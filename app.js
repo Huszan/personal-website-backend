@@ -10,13 +10,7 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 app.listen(3000, () => {
-  console.log("The server started on port 3000 !!!!!!");
-});
-
-app.get("/", (req, res) => {
-  res.send(
-    "<h1 style='text-align: center'>Welcome to FunOfHeuristic <br><br>😃👻😃👻😃👻😃👻😃</h1>"
-  );
+  console.log("The server started on port 3000");
 });
 
 app.post("/post", (req, res) => {
