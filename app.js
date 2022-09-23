@@ -6,17 +6,28 @@ const nodemailer = require("nodemailer");
 const details = require("./details.json");
 
 const app = express();
-app.use(cors({ origin: "*" }));
+app.use(cors(
+    ['https://personal-website-060797.herokuapp.com/'],
+    true,
+    200
+));
 app.use(bodyParser.json());
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', "https://personal-website-060797.herokuapp.com/");
+  res.header('Access-Control-Allow-Headers', true);
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  next();
+})
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`The server started on port ${process.env.PORT}`);
+let listener = app.listen(process.env.PORT || 3000, () => {
+  console.log(`The server started on port ${listener.address().port}`);
 });
 
 app.post("/post", (req, res) => {
   let body = req.body;
   sendMail(body, info => {
-    console.log(`The mail has beed send 😃 and the id is ${info.messageId}`);
+    console.log(`E-mail has been sent. Id -> ${info.messageId}`);
     res.send(info);
   });
 });
