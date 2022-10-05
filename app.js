@@ -1,11 +1,13 @@
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const details = require("./details.json");
 
-const app = express();
 app.use(cors(
     'https://personal-website-060797.herokuapp.com/',
     true,
@@ -31,6 +33,64 @@ app.post("/post", (req, res) => {
     res.send(info);
   });
 });
+
+app.post("/getSoloLeveling", (req, res) => {
+    let body = req.body;
+    let pages = soloLeveling.get(body.chapter);
+    res.send(pages);
+})
+
+const soloLeveling = new Map();
+function getSoloLeveling(chapter) {
+    let soloChUrl = `https://leveling-solo.org/manga/solo-leveling-chapter-3-${chapter}/`;
+    let className = 'solo leveling chapter';
+    let pages = [];
+    axios(soloChUrl)
+        .then(res => {
+            const html = res.data;
+            const $ = cheerio.load(html);
+
+            $('div > a', html)
+                .each(function () {
+                    try {
+                        let obj = $(this).find('img');
+                        let correct = () => {
+                            return obj.attr('alt') === className;
+                        }
+                        const picSrc = obj.attr('src');
+                        if (correct())
+                            pages.push(picSrc);
+                    } catch (err) {
+                        console.log(err);
+                    }
+
+                })
+            if (pages.length === 0) {
+                $('.separator', html)
+                    .each(function () {
+
+                        let obj = $(this).find('img');
+                        const picSrc = obj.attr('src');
+                        pages.push(picSrc);
+                    })
+            }
+            if (pages.length === 0) {
+                $('.wp-block-image > figure', html)
+                    .each(function () {
+
+                        let obj = $(this).find('img');
+                        const picSrc = obj.attr('src');
+                        pages.push(picSrc);
+                    })
+            }
+            console.log(`${chapter} chapter ${pages.length} pages collected`)
+            soloLeveling.set(chapter ,pages);
+            return pages;
+        }).catch(err => console.log(err));
+}
+for(let i = 0; i < 180; i++) {
+    getSoloLeveling(i);
+}
 
 async function sendMail(body, callback) {
   // create reusable transporter object using the default SMTP transport
