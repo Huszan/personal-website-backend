@@ -7,15 +7,17 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const details = require("./details.json");
+const allowedSite = 'https://personal-website-060797.herokuapp.com/';
+
 
 app.use(cors(
-    'https://personal-website-060797.herokuapp.com/',
+    '*',
     true,
     200
 ));
 app.use(bodyParser.json());
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', "https://personal-website-060797.herokuapp.com");
+  res.header('Access-Control-Allow-Origin', "*");
   res.header('Access-Control-Allow-Headers', true);
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
