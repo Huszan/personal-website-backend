@@ -3,19 +3,22 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
-const axios = require('axios');
-const cheerio = require('cheerio');
-
 const details = require("./details.json");
+const {mangaList} = require("./classes/manga");
+const scrapper = require("./classes/scrapper");
+
+const allowedSite = 'https://personal-website-060797.herokuapp.com/';
+
+scrapper.testMangas();
 
 app.use(cors(
-    'https://personal-website-060797.herokuapp.com/',
+    '*',
     true,
     200
 ));
 app.use(bodyParser.json());
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', "https://personal-website-060797.herokuapp.com");
+  res.header('Access-Control-Allow-Origin', "*");
   res.header('Access-Control-Allow-Headers', true);
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -34,63 +37,29 @@ app.post("/post", (req, res) => {
   });
 });
 
-app.post("/getSoloLeveling", (req, res) => {
-    let body = req.body;
-    let pages = soloLeveling.get(body.chapter);
-    res.send(pages);
+app.post("/getManga", (req, res) => {
+    let id = req.body.id;
+    let chapter = req.body.chapter;
+    scrapper.getManga(mangaList[id], chapter)
+        .then(info => {
+          res.send(info);
+        })
 })
 
-const soloLeveling = new Map();
-function getSoloLeveling(chapter) {
-    let soloChUrl = `https://leveling-solo.org/manga/solo-leveling-chapter-3-${chapter}/`;
-    let className = 'solo leveling chapter';
-    let pages = [];
-    axios(soloChUrl)
-        .then(res => {
-            const html = res.data;
-            const $ = cheerio.load(html);
-
-            $('div > a', html)
-                .each(function () {
-                    try {
-                        let obj = $(this).find('img');
-                        let correct = () => {
-                            return obj.attr('alt') === className;
-                        }
-                        const picSrc = obj.attr('src');
-                        if (correct())
-                            pages.push(picSrc);
-                    } catch (err) {
-                        console.log(err);
-                    }
-
-                })
-            if (pages.length === 0) {
-                $('.separator', html)
-                    .each(function () {
-
-                        let obj = $(this).find('img');
-                        const picSrc = obj.attr('src');
-                        pages.push(picSrc);
-                    })
-            }
-            if (pages.length === 0) {
-                $('.wp-block-image > figure', html)
-                    .each(function () {
-
-                        let obj = $(this).find('img');
-                        const picSrc = obj.attr('src');
-                        pages.push(picSrc);
-                    })
-            }
-            console.log(`${chapter} chapter ${pages.length} pages collected`)
-            soloLeveling.set(chapter ,pages);
-            return pages;
-        }).catch(err => console.log(err));
-}
-for(let i = 0; i < 180; i++) {
-    getSoloLeveling(i);
-}
+app.get("/getMangaList", (req, res) => {
+  let list = [];
+  for (let i = 0; i < mangaList.length; i++) {
+    let manga = mangaList[i];
+    list.push({
+      id: i,
+      name: manga.name,
+      pic: manga.pic,
+      startingChapter: manga.startingChapter,
+      chapterCount: manga.chapterCount,
+    })
+  }
+  res.send(list);
+})
 
 async function sendMail(body, callback) {
   // create reusable transporter object using the default SMTP transport
@@ -119,6 +88,3 @@ async function sendMail(body, callback) {
 
   callback(info);
 }
-
-// main().catch(console.error);
-// START BY USING 'nodemon' COMMAND!
