@@ -1,13 +1,17 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const {mangaList} = require("./manga");
+const dbTables = require("./database/dbTables");
+const {getUrlWithToken} = require("../classes/htmlLocate");
 
-async function getManga(manga, chapter) {
+async function getMangaPages(idHtmlLocate, chapter) {
     let pages = [];
-    let locate = manga.htmlLocate;
-
-    for(let i = 0; i < manga.urls.length; i++) {
-        let url = manga.getUrlWithToken(manga.urls[i], chapter);
+    let locate;
+    await dbTables.htmlLocate.read(idHtmlLocate)
+        .then(res => {
+            locate = res;
+        })
+    for(let i = 0; i < locate.urls.length; i++) {
+        let url = getUrlWithToken(locate.urls[i], chapter);
         await axios(url)
             .then(res => {
                 const html = res.data;
@@ -39,25 +43,23 @@ async function getManga(manga, chapter) {
             break;
     }
     if(pages <= 0)
-        console.log(`${manga.name} ${chapter} chapter was unable to get pages`);
+        console.log(`id: ${idHtmlLocate}, ${chapter} chapter was unable to get pages`);
     return pages;
 }
 
-async function testMangas() {
-    let passed = true;
-    console.log(`Started testing mangas`);
-    for (const el of mangaList) {
-        for(let i = el.startingChapter; i <= el.chapterCount; i++) {
-            console.log(`Testing ${el.name} ${i}/${el.chapterCount}`);
-            await getManga(el, i)
-                .then(res => {
-                    if(res.length <= 0)
-                        passed = false;
-                });
-        }
+async function testMangaForm(manga) {
+    let failedChapters = [];
+    for(let i = manga.startingChapter; i <= manga.chapterCount; i++) {
+        console.log(`Testing ${manga.name} ${i}/${manga.chapterCount}`);
+        await getMangaPages(manga, i)
+            .then(res => {
+                if(res.length <= 0)
+                    failedChapters.push(i);
+            });
     }
-    let rText = passed ? 'positive' : 'negative';
-    console.log(`Scrapping manga tests results => ${rText}`);
+    let passed = failedChapters.length === 0;
+    console.log(`Scrapping manga tests results => ${passed ? 'positive' : 'negative'}`);
+    return passed;
 }
 
-module.exports = {getManga, testMangas};
+module.exports = {getMangaPages, testMangaForm};
