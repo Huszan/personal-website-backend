@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const scrapper = require("./modules/scrapper");
 const emailHandler = require("./modules/emailHandler");
 const dbTables = require("./modules/database/dbTables");
+const {Manga} = require("./classes/manga");
+const {HtmlLocate} = require("./classes/htmlLocate");
 
 const allowedSite = 'https://personal-website-060797.herokuapp.com/';
 
@@ -40,6 +42,48 @@ app.post("/getMangaPages", async (req, res) => {
     scrapper.getMangaPages(id, chapter)
         .then(info => {
             res.send(info);
+        })
+})
+app.post("/testMangaForm", async (req, res) => {
+    // It's receiving full manga form
+    let manga = new Manga(
+        null,
+        req.body.name,
+        req.body.pic,
+        req.body.startingChapter,
+        req.body.chapterCount,
+        new HtmlLocate(
+            req.body.htmlLocate.positions,
+            req.body.htmlLocate.lookedType,
+            req.body.htmlLocate.lookedAttr,
+            [],
+            req.body.htmlLocate.urls,
+        ),
+    )
+    scrapper.testMangaForm(manga)
+        .then(info => {
+            res.send(info);
+        })
+})
+app.post("/createManga", async (req, res) => {
+    // It's receiving full manga form
+    let manga = new Manga(
+        null,
+        req.body.name,
+        req.body.pic,
+        req.body.startingChapter,
+        req.body.chapterCount,
+        new HtmlLocate(
+            req.body.htmlLocate.positions,
+            req.body.htmlLocate.lookedType,
+            req.body.htmlLocate.lookedAttr,
+            [],
+            req.body.htmlLocate.urls,
+        ),
+    )
+    dbTables.manga.create(manga)
+        .then(id => {
+            res.send(true);
         })
 })
 
