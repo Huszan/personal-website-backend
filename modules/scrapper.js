@@ -3,13 +3,15 @@ const cheerio = require("cheerio");
 const dbTables = require("./database/dbTables");
 const {getUrlWithToken} = require("../classes/htmlLocate");
 
-async function getMangaPages(idHtmlLocate, chapter) {
+async function getMangaPages(idHtmlLocate, chapter, htmlLocate = null) {
     let pages = [];
-    let locate;
-    await dbTables.htmlLocate.read(idHtmlLocate)
-        .then(res => {
-            locate = res;
-        })
+    let locate = htmlLocate;
+    if(!locate) {
+        await dbTables.htmlLocate.read(idHtmlLocate)
+            .then(res => {
+                locate = res;
+            })
+    }
     for(let i = 0; i < locate.urls.length; i++) {
         let url = getUrlWithToken(locate.urls[i], chapter);
         await axios(url)
@@ -51,15 +53,16 @@ async function testMangaForm(manga) {
     let failedChapters = [];
     for(let i = manga.startingChapter; i <= manga.chapterCount; i++) {
         console.log(`Testing ${manga.name} ${i}/${manga.chapterCount}`);
-        await getMangaPages(manga, i)
+        await getMangaPages(null, i, manga.htmlLocate)
             .then(res => {
-                if(res.length <= 0)
+                if(res.length <= 1)
                     failedChapters.push(i);
             });
     }
     let passed = failedChapters.length === 0;
     console.log(`Scrapping manga tests results => ${passed ? 'positive' : 'negative'}`);
-    return passed;
+    if(passed) return true;
+    else return failedChapters;
 }
 
 module.exports = {getMangaPages, testMangaForm};
