@@ -1,7 +1,7 @@
 {
   "name": "personal-website-backend",
-  "version": "1.1.0",
-  "description": "sending email through node js",
+  "version": "1.2.0",
+  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

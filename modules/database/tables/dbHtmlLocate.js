@@ -28,7 +28,7 @@ async function create(data) {
         `INSERT INTO ${tableName} (${FIELD.positions}, ${FIELD.lookedType}, 
         ${FIELD.lookedAttr}, ${FIELD.reqComparisons}, ${FIELD.urls}) 
         VALUES ('${data.positions}', '${data.lookedType}', 
-        '${data.lookedAttr}', '${data.reqComparisons}', ${data.urls})`;
+        '${data.lookedAttr}', '${data.reqComparisons}', '${data.urls}')`;
     let table;
     await dbHandler.query(sql)
         .then(res => {
