@@ -38,7 +38,8 @@ async function getMangaPages(idHtmlLocate, chapter, htmlLocate = null) {
                                 console.log(err);
                             }
                         })
-                    if(pages.length > 0) break;
+                    if(pages.length > 3) break;
+                    else pages = [];
                 }
             }).catch(err => console.log(err));
         if(pages > 0)
