@@ -17,6 +17,6 @@ const remoteCon = mysql.createConnection({
     password: "zgh3o33rphf58bih",
     database: "t065i8yl6afla4e4",
 })
-const query = util.promisify(remoteCon.query).bind(remoteCon);
+const query = util.promisify(localCon.query).bind(localCon);
 
 module.exports = {TABLES, query};

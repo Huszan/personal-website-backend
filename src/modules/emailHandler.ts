@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const details = require("../details.json");
+const details = require("../../details.json");
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendMail(body, callback) {
+async function sendMail(body: any, callback: any) {
     let mailOptions = {
         from: '"Personal Website"', // sender address
         to: details.email, // list of receivers
@@ -25,4 +25,4 @@ async function sendMail(body, callback) {
     callback(info);
 }
 
-module.exports = {sendMail};
+module.exports = { sendMail };

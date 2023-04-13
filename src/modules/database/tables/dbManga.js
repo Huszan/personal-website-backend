@@ -26,7 +26,7 @@ async function create(data) {
         })
     return table;
 }
-async function read() {
+async function read(id) {
     let sql =
         `SELECT ${FIELD.id} AS id,
         ${FIELD.name} AS name,
@@ -35,6 +35,7 @@ async function read() {
         ${FIELD.chapterCount} AS chapterCount,
         ${FIELD.idHtmlLocate} AS idHtmlLocate
         FROM ${tableName}`
+    if(id) sql += `\nWHERE ${FIELD.id} = ${id}`;
     let data = null;
     await dbHandler.query(sql)
         .then(res => {
@@ -48,7 +49,7 @@ async function update(id, data) {
         `UPDATE ${tableName}
         SET name = '${data.name}', pic = '${data.pic}', starting_chapter = ${data.startingChapter}, 
         chapter_count = ${data.chapterCount}
-        WHERE id_manga = ${id}`
+        WHERE ${FIELD.id} = ${id}`
     await dbHandler.query(sql)
         .then(res => {
             console.log(`Successfully updated ${id} ${tableName}`)
