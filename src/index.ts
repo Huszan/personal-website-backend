@@ -5,6 +5,7 @@ import {MangaType} from "./types/manga.type";
 import {Manga} from "./entity/Manga";
 import * as MangaTable from "./modules/tables/manga-table";
 import * as EmailHandler from "./modules/email-handler";
+import {convertDataToTableEntry} from "./modules/tables/manga-table";
 const express = require('express');
 const cors = require("cors");
 
@@ -36,11 +37,14 @@ AppDataSource.initialize().then(async () => {
     });
 
     app.post("/getMangaPages", async (req: any, res: any) => {
-        let id = req.body.idHtmlLocate;
-        let chapter = req.body.chapter;
-        scrapper.getMangaPages(id, chapter)
+        let manga: MangaType = req.body.manga;
+        let chapter: number = req.body.chapter;
+        scrapper.getMangaPages(manga.htmlLocate.id, chapter)
             .then((results: any) => {
                 res.send(results);
+                let data = MangaTable.convertDataToTableEntry(manga);
+                data.view_count++;
+                MangaTable.update(data, manga.id)
             })
     })
 
