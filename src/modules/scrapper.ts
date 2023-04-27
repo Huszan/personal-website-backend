@@ -60,6 +60,11 @@ export async function testMangaForm(manga: MangaType) {
     }
     let passed = failedChapters.length === 0;
     console.log(`Scrapping manga tests results => ${passed ? 'positive' : 'negative'}`);
-    if(passed) return true;
-    else return failedChapters;
+    if(!passed) return {
+        success: false,
+        failedChapters: failedChapters,
+    };
+    else return {
+        success: true
+    };
 }
