@@ -70,7 +70,6 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/removeManga", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
-        console.log(`Received ${manga.htmlLocate.id} ${manga.id}`);
         HtmlLocateTable.remove(manga.htmlLocate.id)
             .then(() => {
                 MangaTable.remove(manga.id).then(() => {
