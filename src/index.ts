@@ -4,8 +4,10 @@ import * as scrapper from "./modules/scrapper";
 import {MangaType} from "./types/manga.type";
 import {Manga} from "./entity/Manga";
 import * as MangaTable from "./modules/tables/manga-table";
+import * as HtmlLocateTable from "./modules/tables/html-locate-table";
 import * as EmailHandler from "./modules/email-handler";
 import {convertDataToTableEntry} from "./modules/tables/manga-table";
+import {HtmlLocate} from "./entity/HtmlLocate";
 const express = require('express');
 const cors = require("cors");
 
@@ -60,7 +62,22 @@ AppDataSource.initialize().then(async () => {
         let manga: Manga = MangaTable.convertDataToTableEntry(req.body.manga) || null;
         MangaTable.create(manga)
             .then((results: any) => {
-                res.send(true);
+                res.send({
+                    success: true
+                });
+            })
+    })
+
+    app.post("/removeManga", async (req: any, res: any) => {
+        let manga: MangaType = req.body.manga;
+        console.log(`Received ${manga.htmlLocate.id} ${manga.id}`);
+        HtmlLocateTable.remove(manga.htmlLocate.id)
+            .then(() => {
+                MangaTable.remove(manga.id).then(() => {
+                    res.send({
+                        success: true
+                    });
+                })
             })
     })
 
@@ -75,4 +92,5 @@ AppDataSource.initialize().then(async () => {
                 res.send(convertedList);
             })
     })
+
 }).catch(error => console.log(error))
