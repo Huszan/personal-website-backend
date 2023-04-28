@@ -1,18 +1,18 @@
 import {HtmlLocateType} from "../types/html-locate.type";
 import {MangaType} from "../types/manga.type";
+import * as HtmlLocateTable from "./tables/html-locate-table";
 
 const axios = require("axios");
 const cheerio = require("cheerio");
-const dbTables = require("./database/dbTables");
 const { getUrlWithToken } = require("../types/html-locate.type");
 
-async function getMangaPages(idHtmlLocate: number | null, chapter: number, htmlLocate: HtmlLocateType | null = null) {
+export async function getMangaPages(idHtmlLocate: number | null, chapter: number, htmlLocate: HtmlLocateType | null = null) {
     let pages: any = [];
     let locate: HtmlLocateType | null = htmlLocate;
     if(!locate) {
-        await dbTables.htmlLocate.read(idHtmlLocate!)
-            .then((res: HtmlLocateType | null) => {
-                locate = res;
+        await HtmlLocateTable.read(idHtmlLocate)
+            .then((res: any) => {
+                locate = HtmlLocateTable.convertTableEntryToData(res);
             })
     }
     if (locate === null) return pages;
@@ -41,7 +41,6 @@ async function getMangaPages(idHtmlLocate: number | null, chapter: number, htmlL
                 }
             })
             .catch((err: any) => console.log(err.message));
-        console.log(locate.urls[i], pages.length);
         if(pages.length > 0)
             break;
     }
@@ -49,7 +48,7 @@ async function getMangaPages(idHtmlLocate: number | null, chapter: number, htmlL
     return pages;
 }
 
-async function testMangaForm(manga: MangaType) {
+export async function testMangaForm(manga: MangaType) {
     let failedChapters: number[] = [];
     for(let i = manga.startingChapter; i <= manga.chapterCount; i++) {
         console.log(`Testing ${manga.name} ${i}/${manga.chapterCount}`);
@@ -61,8 +60,11 @@ async function testMangaForm(manga: MangaType) {
     }
     let passed = failedChapters.length === 0;
     console.log(`Scrapping manga tests results => ${passed ? 'positive' : 'negative'}`);
-    if(passed) return true;
-    else return failedChapters;
+    if(!passed) return {
+        success: false,
+        failedChapters: failedChapters,
+    };
+    else return {
+        success: true
+    };
 }
-
-module.exports = {getMangaPages, testMangaForm};

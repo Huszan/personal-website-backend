@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendMail(body: any, callback: any) {
+export async function sendMail(body: any, callback: any) {
     let mailOptions = {
         from: '"Personal Website"', // sender address
         to: details.email, // list of receivers
@@ -25,4 +25,3 @@ async function sendMail(body: any, callback: any) {
     callback(info);
 }
 
-module.exports = { sendMail };
