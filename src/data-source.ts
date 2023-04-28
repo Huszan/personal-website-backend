@@ -31,4 +31,4 @@ const productionDataSource = new DataSource({
     subscribers: [],
 })
 
-export const AppDataSource = localDataSource;
+export const AppDataSource = productionDataSource;
