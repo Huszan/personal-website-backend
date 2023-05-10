@@ -66,6 +66,16 @@ AppDataSource.initialize().then(async () => {
         }
     })
 
+    app.post("/testMangaChapter", async (req: any, res: any) => {
+        let manga: MangaType = req.body.manga || null;
+        let chapter = req.body.chapter || null;
+        console.log('testin', manga, chapter)
+        scrapper.testMangaChapter(manga, chapter)
+            .then((passed: any) => {
+                res.send(passed);
+            })
+    })
+
     app.post("/createManga", async (req: any, res: any) => {
         let manga: Manga = MangaTable.convertDataToTableEntry(req.body.manga) || null;
         MangaTable.create(manga)
