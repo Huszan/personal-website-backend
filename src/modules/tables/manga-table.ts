@@ -28,13 +28,13 @@ export async function read(id?: number) {
     }
 }
 
-export async function update(data: Manga, id?: number) {
+export async function update(data: Manga, id?: number, updateDate = false) {
     let entry = await repository.findOneBy({id: id});
     if (entry) {
         for (let para in data) {
             if (entry[para] !== data[para]) { entry[para] = data[para]; }
         }
-        entry.last_update_date = new Date();
+        if (updateDate) { entry.last_update_date = new Date(); }
         return repository.save(entry);
     }
 }
