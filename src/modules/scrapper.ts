@@ -2,6 +2,7 @@ import {HtmlLocateType} from "../types/html-locate.type";
 import {MangaType} from "../types/manga.type";
 import * as HtmlLocateTable from "./tables/html-locate-table";
 import {val} from "cheerio/lib/api/attributes";
+import {Manga} from "../entity/Manga";
 
 const axios = require("axios");
 const cheerio = require("cheerio");
@@ -44,6 +45,15 @@ export async function getMangaPages(chapter: number, locate: HtmlLocateType) {
     }
     if(pages <= 0) console.log(`${locate.id}, ${chapter} chapter was unable to get pages`);
     return pages;
+}
+
+export async function testMangaChapter(manga: MangaType, chapter: number) {
+    let passed = true;
+    await getMangaPages(chapter, manga.htmlLocate)
+        .then(pages => {
+            if(pages.length <= 1) { passed = false }
+        });
+    return passed;
 }
 
 export async function testMangaForm(manga: MangaType) {
