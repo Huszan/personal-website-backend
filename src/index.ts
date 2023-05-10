@@ -41,7 +41,7 @@ AppDataSource.initialize().then(async () => {
     app.post("/getMangaPages", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
         let chapter: number = req.body.chapter;
-        scrapper.getMangaPages(manga.htmlLocate.id, chapter)
+        scrapper.getMangaPages(chapter, manga.htmlLocate)
             .then((results: any) => {
                 res.send(results);
                 let data = MangaTable.convertDataToTableEntry(manga);
@@ -52,10 +52,18 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/testMangaForm", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga || null;
-        scrapper.testMangaForm(manga)
-            .then((results: any) => {
-                res.send(results);
-            })
+        let testId = req.body.testId || null;
+        if (testId) {
+            scrapper.continueTest(manga, testId)
+                .then((results: any) => {
+                    res.send(results);
+                })
+        } else {
+            scrapper.testMangaForm(manga)
+                .then((results: any) => {
+                    res.send(results);
+                })
+        }
     })
 
     app.post("/createManga", async (req: any, res: any) => {
