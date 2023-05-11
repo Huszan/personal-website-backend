@@ -35,7 +35,7 @@ export async function getMangaPages(chapter: number, locate: HtmlLocateType) {
                             let page = $(value).attr(locate.lookedAttr);
                             if (page) { pages.push(page) }
                         })
-                    if(pages.length > 3) break;
+                    if(pages.length > 0) break;
                     else pages = [];
                 }
             })
@@ -62,8 +62,7 @@ export async function testMangaForm(manga: MangaType) {
         console.log(`Testing ${manga.name} ${i}/${manga.chapterCount}`);
         await getMangaPages(i, manga.htmlLocate)
             .then(res => {
-                if(res.length <= 1)
-                    failedChapters.push(i);
+                if(res.length <= 0) { failedChapters.push(i); }
             });
     }
     let passed = failedChapters.length === 0;
