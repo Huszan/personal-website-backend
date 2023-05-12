@@ -31,4 +31,11 @@ const productionDataSource = new DataSource({
     subscribers: [],
 })
 
-export const AppDataSource = productionDataSource;
+let dataSource = productionDataSource;
+
+if (process.env.NODE_ENV.trim() === 'development') {
+    console.log('Started data source on development mode');
+    dataSource = localDataSource;
+}
+
+export const AppDataSource = dataSource;
