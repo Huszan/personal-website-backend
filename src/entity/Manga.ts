@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, JoinColumn} from "typeorm"
 import {HtmlLocate} from "./HtmlLocate";
+import {Like} from "./Like";
 
 @Entity()
 export class Manga {
@@ -39,10 +40,9 @@ export class Manga {
     })
     view_count: number
 
-    @Column({
-        default: 0
-    })
-    like_count: number
+    @OneToMany(() => Like, (like) => like.manga)
+    @JoinColumn()
+    likes: Like[]
 
     @Column({
         type: 'longtext',
@@ -60,10 +60,7 @@ export class Manga {
     })
     chapter_count: number
 
-    @OneToOne(type => HtmlLocate, htmlLocate => htmlLocate.manga, {
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-    })
+    @OneToOne(() => HtmlLocate, htmlLocate => htmlLocate.manga)
     html_locate: HtmlLocate;
 
 }

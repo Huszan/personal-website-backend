@@ -25,3 +25,23 @@ export async function sendMail(body: any, callback: any) {
     callback(info);
 }
 
+export async function sendCustomMail(
+    body: {
+    from: string,
+    to: string,
+    subject: string,
+    text: string
+    },
+    callback: any
+) {
+    let mailOptions = {
+        from: body.from, // sender address
+        to: body.to, // list of receivers
+        subject: body.subject, // Subject line
+        text: body.text
+    }
+    // send mail with defined transport object
+    let info = await transporter.sendMail(mailOptions);
+    callback(info);
+}
+
