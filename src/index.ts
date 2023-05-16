@@ -225,16 +225,7 @@ AppDataSource.initialize().then(async () => {
                             message: "User created. Check Your email to activate your account. (Remember to check spam as well)",
                             data: registerRes,
                         })
-                        EmailHandler.sendCustomMail(
-                            {
-                                from: 'Manga-dot',
-                                to: registerRes.email,
-                                subject: 'Manga-dot: activate account',
-                                text: `To activate your account, please click this link - 
-                                \n${activateUrl}?code=${registerRes.verificationCode}`
-                            },
-                            () => {}
-                        )
+                        AccountHandler.sendConfirmationEmail(activateUrl, registerRes);
                         return;
                     })
                     .catch(registerErr => {
@@ -245,6 +236,59 @@ AppDataSource.initialize().then(async () => {
                         })
                         return;
                     })
+            })
+    })
+
+    app.post("/resendActivation", (req: any, res: any) => {
+        const email = req.body.email;
+        const activateUrl: string = req.body.activateUrl;
+        if (!email || !activateUrl) {
+            res.send({
+                status: 0,
+                message: 'Invalid data. Issue reported to administration',
+                data: null,
+            })
+            console.log('Invalid data given on resendActivation', email, activateUrl);
+            return;
+        }
+        UserTable.read({
+            where: {
+                email: email
+            }
+        }).then(users => {
+            let user = users[0];
+            if (!user) {
+                res.send({
+                    status: 0,
+                    message: 'There is no user with this email',
+                    data: null,
+                })
+                return;
+            }
+            if (!user.verificationCode) {
+                res.send({
+                    status: 0,
+                    message: 'User already verified. You can log in now',
+                    data: null,
+                })
+                return;
+            }
+            AccountHandler.sendConfirmationEmail(activateUrl, user, (info) => {
+                res.send({
+                    status: 1,
+                    message: 'Activation link has been sent to your email address',
+                    data: null,
+                })
+                return;
+            })
+        })
+            .catch(err => {
+                res.send({
+                    status: 0,
+                    message: err,
+                    data: null,
+                })
+                return;
             })
     })
 
