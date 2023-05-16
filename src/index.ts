@@ -19,7 +19,7 @@ import {data} from "cheerio/lib/api/attributes";
 import {FindManyOptions} from "typeorm";
 import {UserType} from "./types/user.type";
 import {User} from "./entity/User";
-import {getRandomString} from "./modules/account-handler";
+import {getRandomString, sendPasswordResetEmail} from "./modules/account-handler";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -439,6 +439,14 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/activate", (req: any, res: any) => {
         const code = req.body.code;
+        if (!code) {
+            res.send({
+                status: 0,
+                message: "Code was not found in request",
+                data: null,
+            })
+            return;
+        }
         UserTable.read({
             where: {
                 verificationCode: code
@@ -475,6 +483,84 @@ AppDataSource.initialize().then(async () => {
                    })
                    return;
                })
+        })
+    });
+
+    app.post("/forgotPassword", async (req: any, res: any) => {
+        const email = req.body.email;
+        const newPassword = req.body.newPassword;
+        if (!email || !newPassword) {
+            res.send({
+                status: 0,
+                message: "Data was not found in request",
+                data: null,
+            })
+            return;
+        }
+        UserTable.read({
+            where: {
+                email: email,
+                verificationCode: null,
+            }
+        })
+            .then(async users => {
+                let user = users[0];
+                if (!user) {
+                    res.send({
+                        status: 0,
+                        message: "There is no user with this email address",
+                        data: null,
+                    })
+                    return;
+                }
+                let generatedToken = AccountHandler.getRandomString();
+                sendPasswordResetEmail(
+                    `${req.protocol}://${req.get('host')}/resetPassword`,
+                    generatedToken,
+                    user,
+                    () => {
+                        AccountHandler.forgotPasswordWaitingList.push({
+                            user: user,
+                            newPassword: newPassword,
+                            token: generatedToken,
+                        });
+                        res.send({
+                            status: 1,
+                            message: "Verification mail has been sent to your account",
+                            data: null,
+                        })
+                        return;
+                    }
+                )
+            })
+    });
+
+    app.get("/resetPassword", async (req: any, res: any) => {
+        const token = req.query.token;
+        if (!token) {
+            res.send("<d1>Token invalid</d1>")
+            return;
+        }
+        let changeRequestIndex = AccountHandler.forgotListIndexOfReq(token);
+        if (changeRequestIndex === null) {
+            res.send("<d1>Token not found</d1>")
+            return;
+        }
+        let changeRequest = AccountHandler.forgotPasswordWaitingList[changeRequestIndex];
+        changeRequest.newPassword = await AccountHandler.hashPassword(changeRequest.newPassword)
+            .then(hash => {
+                return hash;
+            });
+        changeRequest.user.password = changeRequest.newPassword;
+        changeRequest.user.authToken = null;
+        UserTable.update(changeRequest.user).then(userUpdateRes => {
+            if (!userUpdateRes) {
+                res.send("<d1>Something went wrong during changing your account password</d1>")
+                return;
+            } else {
+                res.send("<d1>Your password has been changed</d1>")
+            }
+            AccountHandler.forgotPasswordWaitingList.splice(changeRequestIndex, 1);
         })
     });
 
