@@ -2,6 +2,8 @@ import {AppDataSource} from "../../data-source";
 import {Manga} from "../../entity/Manga";
 import {MangaType} from "../../types/manga.type";
 import * as HtmlLocateTable from "../tables/html-locate-table";
+import * as LikeTable from "../tables/like-table";
+import {FindManyOptions} from "typeorm";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -12,20 +14,16 @@ export async function create(data: Manga) {
     return HtmlLocateTable.create(data.html_locate);
 }
 
-export async function read(id?: number) {
-    if (id) {
-        return repository
-            .createQueryBuilder("manga")
-            .where(`manga.id = ${id}`)
-            .innerJoinAndSelect("manga.html_locate", "html_locate")
-            .getMany();
+export async function read(options?: FindManyOptions<Manga>) {
+    let query = repository
+        .createQueryBuilder("manga")
+        .innerJoinAndSelect("manga.html_locate", "html_locate")
+        .leftJoinAndSelect("manga.likes", "likes")
+    if (options) {
+        query = query.setFindOptions(options);
     }
-    else {
-        return repository
-            .createQueryBuilder("manga")
-            .innerJoinAndSelect("manga.html_locate", "html_locate")
-            .getMany();
-    }
+    return query
+        .getMany();
 }
 
 export async function update(data: Manga, id?: number, updateDate = false) {
@@ -46,6 +44,7 @@ export async function remove(id?: number) {
 
 export function convertDataToTableEntry(data: MangaType): Manga {
     let entry = new Manga();
+    if(data.id) entry.id = data.id;
     entry.name = data.name;
     entry.pic = data.pic;
     if (data.authors) entry.authors = JSON.parse(JSON.stringify(data.authors))
@@ -53,7 +52,6 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     entry.last_update_date = data.lastUpdateDate;
     entry.added_date = data.addedDate;
     entry.view_count = data.viewCount;
-    entry.like_count = data.likeCount;
     entry.description = data.description;
     entry.starting_chapter = data.startingChapter;
     entry.chapter_count = data.chapterCount;
@@ -62,6 +60,10 @@ export function convertDataToTableEntry(data: MangaType): Manga {
 }
 
 export function convertTableEntryToData(entry: Manga): MangaType {
+    const likes = [];
+    entry.likes.forEach(like => {
+        likes.push(LikeTable.convertTableEntryToData(like));
+    })
     let data: MangaType = {
         id: entry.id,
         name: entry.name,
@@ -71,7 +73,7 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         lastUpdateDate: entry.last_update_date,
         addedDate: entry.added_date,
         viewCount: entry.view_count,
-        likeCount: entry.like_count,
+        likes: likes,
         description: entry.description,
         startingChapter: entry.starting_chapter,
         chapterCount: entry.chapter_count,

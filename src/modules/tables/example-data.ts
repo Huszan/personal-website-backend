@@ -1,28 +1,43 @@
-import { Manga } from "../../entity/Manga";
-import { HtmlLocate } from "../../entity/HtmlLocate";
+import {UserType} from "../../types/user.type";
+import {MangaType} from "../../types/manga.type";
+import {HtmlLocateType} from "../../types/html-locate.type";
+import {LikeType} from "../../types/like.type";
 
-const exampleHtmlLocate: HtmlLocate =  new HtmlLocate()
-exampleHtmlLocate.id = 2;
-exampleHtmlLocate.positions =
-    JSON.parse(JSON.stringify([".separator > a", ".separator", ".wp-block-image > figure"]));
-exampleHtmlLocate.looked_type = 'img';
-exampleHtmlLocate.looked_attr = 'src';
-exampleHtmlLocate.urls =
-    JSON.parse(JSON.stringify(["https://leveling-solo.org/manga/solo-leveling-chapter-4-!!!/"]));
+export const exampleHtmlLocateForm: HtmlLocateType = {
+    id: 10000,
+    positions: [".separator > a", ".separator", ".wp-block-image > figure"],
+    lookedType: 'img',
+    lookedAttr: 'src',
+    urls: ["https://leveling-solo.org/manga/solo-leveling-chapter-4-!!!/"],
+}
 
-const exampleManga = new Manga();
-exampleManga.id = 2;
-exampleManga.name = 'Solo Leveling'
-exampleManga.pic = 'https://www.atomcomics.pl/environment/cache/images/0_0_productGfx_208373/STL185278.jpg'
-exampleManga.authors = JSON.parse(JSON.stringify(['Chugong']))
-exampleManga.genres = JSON.parse(JSON.stringify(['Action','Adventure','Demon slaying']))
-exampleManga.last_update_date = new Date()
-exampleManga.added_date = new Date()
-exampleManga.view_count = 0
-exampleManga.like_count = 0
-exampleManga.description = 'Meh'
-exampleManga.starting_chapter = 0
-exampleManga.chapter_count = 179
+export const exampleMangaForm: MangaType = {
+    id: 10000,
+    name: 'Solo Leveling',
+    pic: 'https://www.atomcomics.pl/environment/cache/images/0_0_productGfx_208373/STL185278.jpg',
+    authors: JSON.parse(JSON.stringify(['Chugong'])),
+    genres: JSON.parse(JSON.stringify(['Action','Adventure','Demon slaying'])),
+    lastUpdateDate: new Date(),
+    addedDate: new Date(),
+    viewCount: 0,
+    likes: [],
+    description: 'Meh',
+    startingChapter: 0,
+    chapterCount: 179,
+    htmlLocate: exampleHtmlLocateForm,
+}
 
-exampleManga.html_locate = exampleHtmlLocate;
-exampleHtmlLocate.manga = exampleManga;
+export const exampleUserForm: UserType = {
+    id: 10000,
+    name: '***REMOVED***',
+    email: '***REMOVED***',
+    password: 'unrefinedPassword123',
+    isVerified: false,
+    accountType: 'admin',
+}
+
+export const exampleLike: LikeType = {
+    id: null,
+    mangaId: 10000,
+    userId: 10000,
+}
