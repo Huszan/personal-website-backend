@@ -2,6 +2,8 @@ import "reflect-metadata"
 import { DataSource } from "typeorm"
 import { HtmlLocate } from "./entity/HtmlLocate"
 import { Manga } from "./entity/Manga";
+import {Like} from "./entity/Like";
+import {User} from "./entity/User";
 
 const localDataSource = new DataSource({
     type: "mysql",
@@ -12,7 +14,7 @@ const localDataSource = new DataSource({
     database: "pwmain",
     synchronize: true,
     logging: false,
-    entities: [HtmlLocate, Manga],
+    entities: [HtmlLocate, Manga, Like, User],
     migrations: [],
     subscribers: [],
 })
@@ -26,9 +28,16 @@ const productionDataSource = new DataSource({
     database: "t065i8yl6afla4e4",
     synchronize: true,
     logging: false,
-    entities: [HtmlLocate, Manga],
+    entities: [HtmlLocate, Manga, Like, User],
     migrations: [],
     subscribers: [],
 })
 
-export const AppDataSource = productionDataSource;
+let dataSource = productionDataSource;
+
+if (process.env.NODE_ENV.trim() === 'development') {
+    console.log('Started data source on development mode');
+    dataSource = localDataSource;
+}
+
+export const AppDataSource = dataSource;

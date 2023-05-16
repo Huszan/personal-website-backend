@@ -1,4 +1,5 @@
 import {HtmlLocateType} from "./html-locate.type";
+import {LikeType} from "./like.type";
 
 export interface MangaType {
     id: number,
@@ -9,7 +10,7 @@ export interface MangaType {
     lastUpdateDate: Date,
     addedDate: Date,
     viewCount: number,
-    likeCount: number,
+    likes: LikeType[],
     description: string,
     startingChapter: number,
     chapterCount: number,

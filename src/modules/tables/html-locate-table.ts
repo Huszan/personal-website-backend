@@ -31,6 +31,7 @@ export async function remove(id?: number) {
 
 export function convertDataToTableEntry(data: HtmlLocateType, manga?: Manga): HtmlLocate {
     let entry = new HtmlLocate();
+    if(data.id) entry.id = data.id;
     if(data.urls) entry.urls = JSON.parse(JSON.stringify(data.urls));
     if(data.positions) entry.positions =  JSON.parse(JSON.stringify(data.positions));
     entry.looked_type = data.lookedType;
