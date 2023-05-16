@@ -187,6 +187,7 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/register", (req: any, res: any) => {
         const userData: UserType = req.body.user;
+        const activateUrl: string = req.body.activateUrl;
         if (!userData || !userData.email || !userData.name || !userData.password) {
             res.send({
                 status: 0,
@@ -221,7 +222,7 @@ AppDataSource.initialize().then(async () => {
                     .then(registerRes => {
                         res.send({
                             status: 1,
-                            message: "User created. Check Your email to activate your account.",
+                            message: "User created. Check Your email to activate your account. (Remember to check spam as well)",
                             data: registerRes,
                         })
                         EmailHandler.sendCustomMail(
@@ -230,7 +231,7 @@ AppDataSource.initialize().then(async () => {
                                 to: registerRes.email,
                                 subject: 'Manga-dot: activate account',
                                 text: `To activate your account, please click this link - 
-                                \n${req.protocol + '://' + req.get('host')}/activate?code=${registerRes.verificationCode}`
+                                \n${activateUrl}?code=${registerRes.verificationCode}`
                             },
                             () => {}
                         )
@@ -392,15 +393,18 @@ AppDataSource.initialize().then(async () => {
             })
     });
 
-    app.get("/activate", (req: any, res: any) => {
-        const code = req.query.code;
+    app.post("/activate", (req: any, res: any) => {
+        const code = req.body.code;
         UserTable.read({
             where: {
                 verificationCode: code
             }
         }).then(users => {
            if (!users[0]) {
-               res.send('<d1>This verification code expired</d1>')
+               res.send({
+                   status: 0,
+                   message: 'This verification code expired',
+               })
                return;
            }
            const updatedUser = users[0];
@@ -408,14 +412,23 @@ AppDataSource.initialize().then(async () => {
            UserTable.update(updatedUser)
                .then(verifiedUser => {
                    if (!verifiedUser) {
-                       res.send('<d1>Something went wrong during user verification. Try again later.</d1>')
+                       res.send({
+                           status: 0,
+                           message: 'Something went wrong during user verification. Try again later.',
+                       })
                        return;
                    }
-                   res.send('<d1>Account verified successfully</d1>')
+                   res.send({
+                       status: 1,
+                       message: 'Account verified successfully. You can now log in!',
+                   })
                    return;
                })
                .catch(verifiedErr => {
-                   res.send(`<d1>${verifiedErr}</d1>`)
+                   res.send({
+                       status: 0,
+                       message: verifiedErr,
+                   })
                    return;
                })
         })
