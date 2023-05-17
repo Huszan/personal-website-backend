@@ -3,7 +3,7 @@ import {Manga} from "../../entity/Manga";
 import {MangaType} from "../../types/manga.type";
 import * as HtmlLocateTable from "../tables/html-locate-table";
 import * as LikeTable from "../tables/like-table";
-import {FindManyOptions} from "typeorm";
+import {FindManyOptions, Like} from "typeorm";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -14,12 +14,19 @@ export async function create(data: Manga) {
     return HtmlLocateTable.create(data.html_locate);
 }
 
-export async function read(options?: FindManyOptions<Manga>) {
+export async function read(options?: FindManyOptions<Manga>, bigSearch?: string) {
     let query = repository
         .createQueryBuilder("manga")
         .innerJoinAndSelect("manga.html_locate", "html_locate")
         .leftJoinAndSelect("manga.likes", "likes")
+        .loadRelationCountAndMap('manga.like_count', 'manga.likes')
+
     if (options) {
+        if (bigSearch) {
+            options.where = {
+                name: Like(`%${bigSearch}%`),
+            }
+        }
         query = query.setFindOptions(options);
     }
     return query
