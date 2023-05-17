@@ -40,6 +40,9 @@ export class Manga {
     })
     view_count: number
 
+    @Column()
+    like_count: number
+
     @OneToMany(() => Like, (like) => like.manga)
     @JoinColumn()
     likes: Like[]
