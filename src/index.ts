@@ -12,13 +12,9 @@ import * as AccountHandler from './modules/account-handler';
 const express = require('express');
 const cors = require("cors");
 import * as ExampleData from "./modules/tables/example-data";
-import {HtmlLocate} from "./entity/HtmlLocate";
-import {Like} from "./entity/Like";
 import {LikeType} from "./types/like.type";
-import {data} from "cheerio/lib/api/attributes";
 import {FindManyOptions} from "typeorm";
 import {UserType} from "./types/user.type";
-import {User} from "./entity/User";
 import {getRandomString, sendPasswordResetEmail} from "./modules/account-handler";
 
 AppDataSource.initialize().then(async () => {
@@ -104,17 +100,11 @@ AppDataSource.initialize().then(async () => {
         })
     })
 
-    app.get("/getMangaList", (req: any, res: any) => {
-        let id: number | undefined = req.query.id;
-        let options: FindManyOptions<Manga> | null = null;
+    app.post("/getMangaList", (req: any, res: any) => {
+        let options: FindManyOptions<Manga> | undefined = req.body.options as FindManyOptions<Manga>;
+        let bigSearch: string | undefined = req.body.bigSearch;
 
-        if (id) { options = {
-            where: {
-                id: id
-            }
-        } }
-
-        MangaTable.read(options)
+        MangaTable.read(options, bigSearch)
             .then((mangaList: any) => {
                 let convertedList = [];
                 mangaList.forEach(el => {
