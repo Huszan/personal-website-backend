@@ -22,7 +22,7 @@ export async function comparePassword(password: string, hash: string) {
     return bcrypt.compare(password, hash);
 }
 
-export function sendConfirmationEmail(url: string, user: User, callback?: Function) {
+export function sendConfirmationEmail(url: string, user: User, callback?: any) {
     EmailHandler.sendCustomMail(
         {
             from: 'Manga-dot',
@@ -35,7 +35,7 @@ export function sendConfirmationEmail(url: string, user: User, callback?: Functi
     )
 }
 
-export function sendPasswordResetEmail(url: string, token: string, user: User, callback?: Function) {
+export function sendPasswordResetEmail(url: string, token: string, user: User, callback?: any) {
     EmailHandler.sendCustomMail(
         {
             from: 'Manga-dot',
@@ -44,7 +44,7 @@ export function sendPasswordResetEmail(url: string, token: string, user: User, c
             text: `To reset your account password, please click this link - 
                                 \n${url}?token=${token}`
         },
-        callback
+        callback()
     )
 }
 

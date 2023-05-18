@@ -263,7 +263,7 @@ AppDataSource.initialize().then(async () => {
                 })
                 return;
             }
-            AccountHandler.sendConfirmationEmail(activateUrl, user, (info) => {
+            AccountHandler.sendConfirmationEmail(activateUrl, user, () => {
                 res.send({
                     status: 1,
                     message: 'Activation link has been sent to your email address',
