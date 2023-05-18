@@ -32,7 +32,7 @@ export async function sendCustomMail(
     subject: string,
     text: string
     },
-    callback: any
+    callback?: any
 ) {
     let mailOptions = {
         from: body.from, // sender address
@@ -42,6 +42,6 @@ export async function sendCustomMail(
     }
     // send mail with defined transport object
     let info = await transporter.sendMail(mailOptions);
-    callback(info);
+    if (callback) callback(info);
 }
 
