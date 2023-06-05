@@ -4,6 +4,7 @@ import { HtmlLocate } from "./entity/HtmlLocate"
 import { Manga } from "./entity/Manga";
 import {Like} from "./entity/Like";
 import {User} from "./entity/User";
+import {Chapter} from "./entity/Chapter";
 
 const localDataSource = new DataSource({
     type: "mysql",
@@ -14,7 +15,7 @@ const localDataSource = new DataSource({
     database: "pwmain",
     synchronize: true,
     logging: false,
-    entities: [HtmlLocate, Manga, Like, User],
+    entities: [HtmlLocate, Manga, Like, User, Chapter],
     migrations: [],
     subscribers: [],
 })
@@ -28,7 +29,7 @@ const productionDataSource = new DataSource({
     database: "t065i8yl6afla4e4",
     synchronize: true,
     logging: false,
-    entities: [HtmlLocate, Manga, Like, User],
+    entities: [HtmlLocate, Manga, Like, User, Chapter],
     migrations: [],
     subscribers: [],
 })

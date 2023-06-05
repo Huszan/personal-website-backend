@@ -19,12 +19,11 @@ function getLocalisations(htmlLocate: HtmlLocateType): string[] {
     return localisations;
 }
 
-export async function getMangaPages(chapter: number, locate: HtmlLocateType) {
+export async function getMangaPages(locate: HtmlLocateType) {
     let pages: any = [];
     if (locate === null) return pages;
     for(let i = 0; i < locate.urls.length; i++) {
-        let url = getUrlWithToken(locate.urls[i], chapter);
-        await axios(url)
+        await axios(locate.urls[i])
             .then((res: any) => {
                 const html = res.data;
                 const $ = cheerio.load(html);
@@ -43,13 +42,13 @@ export async function getMangaPages(chapter: number, locate: HtmlLocateType) {
         if(pages.length > 0)
             break;
     }
-    if(pages <= 0) console.log(`${locate.id}, ${chapter} chapter was unable to get pages`);
+    if(pages <= 0) console.log(`${locate.id} was unable to get pages`);
     return pages;
 }
 
 export async function testMangaChapter(manga: MangaType, chapter: number) {
     let passed = true;
-    await getMangaPages(chapter, manga.htmlLocate)
+    await getMangaPages(manga.chapters[chapter].pagesHtmlLocate)
         .then(pages => {
             if(pages.length <= 1) { passed = false }
         });
@@ -60,7 +59,7 @@ export async function testMangaForm(manga: MangaType) {
     let failedChapters: number[] = [];
     for(let i = manga.startingChapter; i <= manga.chapterCount; i++) {
         console.log(`Testing ${manga.name} ${i}/${manga.chapterCount}`);
-        await getMangaPages(i, manga.htmlLocate)
+        await getMangaPages(manga.chapters[i].pagesHtmlLocate)
             .then(res => {
                 if(res.length <= 0) { failedChapters.push(i); }
             });
@@ -89,7 +88,7 @@ export async function continueTest(manga: MangaType, testId: number) {
     for (const chapter of test.failedOn) {
         console.log(`Testing ${manga.name} ${chapter}/${manga.chapterCount}`);
         if (chapter > manga.chapterCount) { test.failedOn.splice(i, 1); }
-        else await getMangaPages(chapter, manga.htmlLocate)
+        else await getMangaPages(manga.chapters[chapter].pagesHtmlLocate)
             .then(res => {
                 if(res.length <= 1)
                     failedChapters.push(chapter);

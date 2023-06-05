@@ -1,6 +1,6 @@
 
 export interface LikeType {
-    id: number,
+    id?: number,
     userId: number,
     mangaId: number,
 }
