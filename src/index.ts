@@ -16,6 +16,9 @@ import {LikeType} from "./types/like.type";
 import {FindManyOptions} from "typeorm";
 import {UserType} from "./types/user.type";
 import {getRandomString, sendPasswordResetEmail} from "./modules/account-handler";
+import {AdvancedScrapper} from "./modules/scrapper/advanced-scrapper";
+import {HtmlLocateType} from "./types/html-locate.type";
+import {BTTScrapper} from "./modules/scrapper/b-t-t-scrapper";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -47,7 +50,7 @@ AppDataSource.initialize().then(async () => {
     app.post("/getMangaPages", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
         let chapter: number = req.body.chapter;
-        scrapper.getMangaPages(chapter, manga.htmlLocate)
+        scrapper.getMangaPages(manga.chapters[chapter].pagesHtmlLocate)
             .then((results: any) => {
                 res.send(results);
                 let data = MangaTable.convertDataToTableEntry(manga);
@@ -93,7 +96,8 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/removeManga", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
-        MangaTable.remove(manga.id).then(() => {
+        let tableEntry = MangaTable.convertDataToTableEntry(manga);
+        MangaTable.remove(tableEntry).then(() => {
             res.send({
                 success: true
             });
@@ -553,5 +557,8 @@ AppDataSource.initialize().then(async () => {
             AccountHandler.forgotPasswordWaitingList.splice(changeRequestIndex, 1);
         })
     });
+
+    // let bttScrapper = new BTTScrapper();
+    // bttScrapper.sendSpider();
 
 }).catch(error => console.log(error))

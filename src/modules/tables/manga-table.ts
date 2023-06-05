@@ -10,16 +10,16 @@ const repository = AppDataSource.manager.getRepository(Manga);
 export async function create(data: Manga) {
     data.added_date = new Date();
     data.last_update_date = new Date();
-    await repository.save(data);
-    return HtmlLocateTable.create(data.html_locate);
+    return repository.save(data);
 }
 
 export async function read(options?: FindManyOptions<Manga>, bigSearch?: string) {
     let query = repository
         .createQueryBuilder("manga")
-        .innerJoinAndSelect("manga.html_locate", "html_locate")
         .leftJoinAndSelect("manga.likes", "likes")
+        .leftJoinAndSelect("manga.chapters", "chapters")
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
+        .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
 
     if (options) {
         if (bigSearch) {
@@ -44,9 +44,11 @@ export async function update(data: Manga, id?: number, updateDate = false) {
     }
 }
 
-export async function remove(id?: number) {
-    let entry = await repository.findOneBy({id: id});
-    if (entry) { return repository.remove(entry) }
+export async function remove(manga: Manga) {
+    for (let chapter of manga.chapters) {
+        await HtmlLocateTable.remove(chapter.pages_html_locate_id);
+    }
+    if (manga) { return repository.remove(manga) }
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {
@@ -62,7 +64,6 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     entry.description = data.description;
     entry.starting_chapter = data.startingChapter;
     entry.chapter_count = data.chapterCount;
-    entry.html_locate = HtmlLocateTable.convertDataToTableEntry(data.htmlLocate, entry);
     return entry;
 }
 
@@ -84,7 +85,6 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         description: entry.description,
         startingChapter: entry.starting_chapter,
         chapterCount: entry.chapter_count,
-        htmlLocate: HtmlLocateTable.convertTableEntryToData(entry.html_locate),
     }
     return data;
 }

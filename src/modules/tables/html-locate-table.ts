@@ -29,14 +29,13 @@ export async function remove(id?: number) {
     if (entry) { return repository.remove(entry) }
 }
 
-export function convertDataToTableEntry(data: HtmlLocateType, manga?: Manga): HtmlLocate {
+export function convertDataToTableEntry(data: HtmlLocateType): HtmlLocate {
     let entry = new HtmlLocate();
     if(data.id) entry.id = data.id;
     if(data.urls) entry.urls = JSON.parse(JSON.stringify(data.urls));
     if(data.positions) entry.positions =  JSON.parse(JSON.stringify(data.positions));
     entry.looked_type = data.lookedType;
     entry.looked_attr = data.lookedAttr;
-    if (manga) entry.manga = manga;
     return entry;
 }
 
