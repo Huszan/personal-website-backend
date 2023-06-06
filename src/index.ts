@@ -1,10 +1,10 @@
 import { AppDataSource } from "./data-source"
 import * as bodyParser from "body-parser";
-import * as scrapper from "./modules/scrapper";
 import {MangaType} from "./types/manga.type";
 import {Manga} from "./entity/Manga";
 import * as MangaTable from "./modules/tables/manga-table";
 import * as HtmlLocateTable from "./modules/tables/html-locate-table";
+import * as PageTable from "./modules/tables/page-table";
 import * as UserTable from "./modules/tables/user-table";
 import * as LikeTable from "./modules/tables/like-table";
 import * as EmailHandler from "./modules/email-handler";
@@ -50,7 +50,11 @@ AppDataSource.initialize().then(async () => {
     app.post("/getMangaPages", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
         let chapter: number = req.body.chapter;
-        scrapper.getMangaPages(manga.chapters[chapter].pagesHtmlLocate)
+        PageTable.read({
+            where: {
+                chapter: manga.chapters[chapter]
+            }
+        })
             .then((results: any) => {
                 res.send(results);
                 let data = MangaTable.convertDataToTableEntry(manga);
@@ -60,28 +64,30 @@ AppDataSource.initialize().then(async () => {
     })
 
     app.post("/testMangaForm", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga || null;
-        let testId = req.body.testId || null;
-        if (testId) {
-            scrapper.continueTest(manga, testId)
-                .then((results: any) => {
-                    res.send(results);
-                })
-        } else {
-            scrapper.testMangaForm(manga)
-                .then((results: any) => {
-                    res.send(results);
-                })
-        }
+        // let manga: MangaType = req.body.manga || null;
+        // let testId = req.body.testId || null;
+        // if (testId) {
+        //     scrapper.continueTest(manga, testId)
+        //         .then((results: any) => {
+        //             res.send(results);
+        //         })
+        // } else {
+        //     scrapper.testMangaForm(manga)
+        //         .then((results: any) => {
+        //             res.send(results);
+        //         })
+        // }
+        res.send(false);
     })
 
     app.post("/testMangaChapter", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga || null;
-        let chapter = req.body.chapter || null;
-        scrapper.testMangaChapter(manga, chapter)
-            .then((passed: any) => {
-                res.send(passed);
-            })
+        // let manga: MangaType = req.body.manga || null;
+        // let chapter = req.body.chapter || null;
+        // scrapper.testMangaChapter(manga, chapter)
+        //     .then((passed: any) => {
+        //         res.send(passed);
+        //     })
+        res.send(false);
     })
 
     app.post("/createManga", async (req: any, res: any) => {
@@ -110,9 +116,12 @@ AppDataSource.initialize().then(async () => {
 
         MangaTable.read(options, bigSearch)
             .then((mangaList: any) => {
-                let convertedList = [];
+                let convertedList: MangaType[] = [];
                 mangaList.forEach(el => {
                     convertedList.push(MangaTable.convertTableEntryToData(el));
+                })
+                convertedList.forEach(el => {
+                    el.chapters = el.chapters.sort((a, b) => b.id - a.id);
                 })
                 res.send(convertedList);
             })
@@ -558,7 +567,9 @@ AppDataSource.initialize().then(async () => {
         })
     });
 
-    // let bttScrapper = new BTTScrapper();
-    // bttScrapper.sendSpider();
+    let bttScrapper = new BTTScrapper();
+    bttScrapper.sendSpider({
+        saveEntries: true,
+    });
 
 }).catch(error => console.log(error))

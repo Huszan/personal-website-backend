@@ -1,6 +1,7 @@
 import {Cheerio, CheerioAPI, Element} from "cheerio";
 import {HtmlLocateType} from "../../types/html-locate.type";
 import {MangaType} from "../../types/manga.type";
+import {PageType} from "../../types/page.type";
 
 const axios = require("axios");
 const cheerio = require("cheerio");
@@ -24,25 +25,39 @@ export class AdvancedScrapper {
             description?: HtmlLocateType,
             chapters?: {
                 name: HtmlLocateType,
-                link: HtmlLocateType,
+                url: HtmlLocateType,
             },
             pages?: HtmlLocateType,
-        }
+        },
+        beforeUrl?: string,
     ): Promise<MangaType | any> {
         try {
             let chapters: any = [];
             if (localisation.chapters) {
                 let chapterNames = await this.gatherEntries(localisation.chapters.name);
-                let chapterLinks = await this.gatherEntries(localisation.chapters.link);
+                let chapterLinks = await this.gatherEntries(localisation.chapters.url);
                 for (let i = 0; i < chapterNames.length; i++) {
-                    let clonedPages = JSON.parse(JSON.stringify(localisation.pages));
-                    clonedPages.urls = [chapterLinks[i]];
-                    chapters.push({
-                        name: chapterNames[i],
-                        htmlLocate: clonedPages,
-                    })
+                    process.stdout.write(`\rProcessing ${i}/${chapterNames.length}\r`);
+                    let pagesLocate = JSON.parse(JSON.stringify(localisation.pages));
+                    if (beforeUrl) {
+                        pagesLocate.urls = [`${beforeUrl}${chapterLinks[i]}`];
+                    }
+                    let pages: PageType[] = [];
+                    let pageEntries = await this.gatherEntries(pagesLocate);
+                    for (let page of pageEntries) {
+                        pages.push({
+                            url: page
+                        })
+                    }
+                    if (pages.length > 0) {
+                        chapters.push({
+                            name: chapterNames[i],
+                            pages: pages,
+                        })
+                    }
                 }
             }
+            if (chapters.length === 0) { return null }
             let manga = {
                 name: localisation.name ? await this.gatherEntries(localisation.name) : null,
                 pic: localisation.pic ? await this.gatherEntries(localisation.pic) : null,
@@ -57,8 +72,8 @@ export class AdvancedScrapper {
             return manga;
         }
         catch (error) {
-            console.log('Something went wrong during getting manga data.');
-            throw error;
+            console.log('Something went wrong during getting manga data.\n', error);
+            return null;
         }
     }
 
@@ -107,6 +122,41 @@ export class AdvancedScrapper {
             console.error("Error fetching page HTML:", error);
             throw error;
         }
+    }
+
+    private static getLocalisations(htmlLocate: HtmlLocateType): string[] {
+        const localisations = [];
+        htmlLocate.positions.forEach(pos => {
+            localisations.push(`${pos} > ${htmlLocate.lookedType}`);
+        })
+        return localisations;
+    }
+
+    static async getMangaPages(locate: HtmlLocateType) {
+        let pages: any = [];
+        if (locate === null) return pages;
+        for(let i = 0; i < locate.urls.length; i++) {
+            await axios(locate.urls[i])
+                .then((res: any) => {
+                    const html = res.data;
+                    const $ = cheerio.load(html);
+                    let localisations = this.getLocalisations(locate);
+                    for(let i = 0; i < localisations.length; i++) {
+                        $(localisations[i])
+                            .each((index, value) => {
+                                let page = $(value).attr(locate.lookedAttr);
+                                if (page) { pages.push(page) }
+                            })
+                        if(pages.length > 0) break;
+                        else pages = [];
+                    }
+                })
+                .catch((err: any) => console.log(err.message));
+            if(pages.length > 0)
+                break;
+        }
+        if(pages <= 0) console.log(`${locate.id} was unable to get pages`);
+        return pages;
     }
 
 }
