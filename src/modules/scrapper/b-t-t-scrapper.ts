@@ -2,165 +2,15 @@ import {AdvancedScrapper} from "./advanced-scrapper";
 import {getUrlWithToken, HtmlLocateType} from "../../types/html-locate.type";
 import {Manga} from "../../entity/Manga";
 import {Chapter} from "../../entity/Chapter";
-import {HtmlLocate} from "../../entity/HtmlLocate";
 import * as MangaTable from "../tables/manga-table";
+import {Page} from "../../entity/Page";
 
 const mangaLocations: HtmlLocateType[] = [
     {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
+        positions: ['.truyen-list > .list-truyen-item-wrap'],
+        lookedType: 'a:nth-child(1)',
         lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/0-9?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/A?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/B?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/C?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/D?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/E?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/F?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/G?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/H?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/I?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/J?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/K?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/L?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/M?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/N?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/O?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/P?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/Q?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/R?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/S?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/T?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/U?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/W?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/X?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/Y?page=!!!']
-    },
-    {
-        positions: ['.manga_list-sbs > .mls-wrap > div'],
-        lookedType: 'a',
-        lookedAttr: 'href',
-        urls: ['https://mangareader.to/az-list/Z?page=!!!']
+        urls: ['https://ww5.mangakakalot.tv/manga_list/?type=topview&category=all&state=all&page=!!!']
     },
 ]
 
@@ -168,16 +18,18 @@ const fs = require('fs');
 
 export class BTTScrapper {
 
-    async getEntries(amount = undefined) {
+    async getEntries(amount = undefined, saveEntries = true) {
         let entries: any = [];
-        await this.loadEntries()
-            .then((jsonData) => {
-                entries = jsonData;
-                console.log('Entries loaded');
-            })
-            .catch((err) => {
-                console.log(err);
-            })
+        if (saveEntries) {
+            await this.loadEntries()
+                .then((jsonData) => {
+                    entries = jsonData;
+                    console.log('Entries loaded');
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        }
 
         if (entries.length <= 0) {
             for (let location of mangaLocations) {
@@ -199,7 +51,7 @@ export class BTTScrapper {
 
             if (amount) entries = entries.slice(0, amount);
             entries = this.giveEntriesProperHttp(entries);
-            this.saveEntries(JSON.stringify(entries));
+            if (saveEntries) this.saveEntries(JSON.stringify(entries));
         }
 
         return entries;
@@ -231,81 +83,71 @@ export class BTTScrapper {
 
     private giveEntriesProperHttp(entries: any[]) {
         entries.forEach((el, index) => {
-            entries[index] = `https://mangareader.to/${encodeURIComponent(el.slice(1))}`;
+            entries[index] = `https://ww5.mangakakalot.tv/${encodeURIComponent(el.slice(1))}`;
         })
         return entries;
-    }
-
-    async getEntryIndex(url: string) {
-        let entries: any = [];
-        await this.loadEntries()
-            .then((jsonData) => {
-                entries = jsonData;
-                console.log('Entries loaded');
-            })
-            .catch((err) => {
-                console.log(err);
-            })
-        return entries.findIndex(el => el == url);
     }
 
     async getMangaData(entry: any) {
         const data = await AdvancedScrapper.getMangaData({
             name: {
-                positions: ['#ani_detail > div > div > div.anis-content > div.anisc-detail'],
-                lookedType: 'h2',
+                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(1)'],
+                lookedType: 'h1',
                 lookedAttr: 'content',
                 urls: [entry],
             },
             pic: {
-                positions: ['#ani_detail > div > div > div.anis-content > div.anisc-poster > div'],
+                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > div'],
                 lookedType: 'img',
                 lookedAttr: 'src',
                 urls: [entry]
             },
             authors: {
-                positions: ['#ani_detail > div > div > div.anis-content > div.anisc-detail > div.sort-desc > div.anisc-info-wrap > div.anisc-info > div:nth-child(3)'],
+                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(2)'],
                 lookedType: 'a',
                 lookedAttr: 'content',
                 urls: [entry],
             },
             genres: {
-                positions: ['#ani_detail > div > div > div.anis-content > div.anisc-detail > div.sort-desc > div.genres'],
+                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(7)'],
                 lookedType: 'a',
                 lookedAttr: 'content',
                 urls: [entry],
             },
             description: {
-                positions: ['#ani_detail > div > div > div.anis-content > div.anisc-detail > div.sort-desc'],
-                lookedType: '.description',
+                positions: ['body > div.container > div.main-wrapper > div.leftCol'],
+                lookedType: '#noidungm',
                 lookedAttr: 'content',
                 urls: [entry],
             },
             chapters: {
                 name: {
-                    positions: ['#en-chapters > li'],
+                    positions: ['#chapter > div > div.chapter-list > div.row > span'],
                     lookedType: 'a',
-                    lookedAttr: 'title',
+                    lookedAttr: 'content',
                     urls: [entry],
                 },
-                link: {
-                    positions: ['#en-chapters > li'],
+                url: {
+                    positions: ['#chapter > div > div.chapter-list > div.row > span'],
                     lookedType: 'a',
                     lookedAttr: 'href',
                     urls: [entry],
                 }
             },
             pages: {
-                positions: ['#main-wrapper > div.container > div.container-reader-chapter'],
-                lookedType: 'div',
-                lookedAttr: 'data-url',
+                positions: ['#vungdoc'],
+                lookedType: 'img',
+                lookedAttr: 'data-src',
                 urls: [entry],
             }
-        });
+        },
+            'https://ww5.mangakakalot.tv'
+            );
+        if (!data) return null;
         data.description = data.description.trim().replace(/\n\s*/g, '');
+        data.pic = `https://ww5.mangakakalot.tv${data.pic}`
         data.chapters.forEach((chapter, i) => {
             data.chapters[i].name = chapter.name.replace('\n', '').trim();
-            data.chapters[i].htmlLocate.urls[0] = `https://mangareader.to${chapter.htmlLocate.urls[0]}`;
         })
         if (data.chapters.length < 1) return null;
         return data;
@@ -313,6 +155,10 @@ export class BTTScrapper {
 
     async sendMangaToDatabase(data: any, manga?: Manga) {
         let dbManga = manga ? manga : new Manga();
+        // Temporary solution to not create duplicates
+        if (manga) {
+            return MangaTable.update(dbManga, dbManga.id);
+        }
         dbManga.name = data.name;
         dbManga.pic = data.pic;
         dbManga.description = data.description;
@@ -321,29 +167,32 @@ export class BTTScrapper {
         dbManga.description = data.description;
         let dbChapters: Chapter[] = manga ? manga.chapters : [];
         for (let chapter of data.chapters) {
-            if (!dbChapters.some((el) => el.name === chapter.name)) {
-                let dbChapter = new Chapter();
-                dbChapter.name = chapter.name;
-                let dbHtmlLocate = new HtmlLocate();
-                dbHtmlLocate.urls = JSON.parse(JSON.stringify(chapter.htmlLocate.urls));
-                dbHtmlLocate.positions = JSON.parse(JSON.stringify(chapter.htmlLocate.positions));
-                dbHtmlLocate.looked_attr = chapter.htmlLocate.looked_attr;
-                dbHtmlLocate.looked_type = chapter.htmlLocate.looked_type;
-                dbHtmlLocate.chapter = dbChapter;
-                dbChapter.pages_html_locate = dbHtmlLocate;
-                dbChapter.manga = dbManga;
-                dbChapters.push(dbChapter);
+            let dbChapter = new Chapter();
+            dbChapter.name = chapter.name;
+            dbChapter.manga = dbManga;
+            let dbPages: Page[] = [];
+            for (let page of chapter.pages) {
+                let dbPage = new Page();
+                dbPage.chapter = dbChapter;
+                dbPage.url = page.url;
+                dbPages.push(dbPage);
             }
+            dbChapter.pages = dbPages;
+            dbChapters.push(dbChapter);
         }
         dbManga.chapters = dbChapters;
-        if (manga) return MangaTable.update(dbManga, dbManga.id);
         return MangaTable.create(dbManga);
     }
 
-    async sendSpider(entryAmount?: number, skipTo?: number) {
+    async sendSpider(options: {
+        entryAmount?: number,
+        skipTo?: number,
+        saveEntries: boolean,
+    }) {
         let entries: any[] = await this.getEntries(
-            entryAmount ? entryAmount : undefined);
-        if (skipTo && entries.length > skipTo) { entries = entries.slice(skipTo, entries.length); }
+            options.entryAmount ? options.entryAmount : undefined,
+            options.saveEntries);
+        if (options.skipTo && entries.length > options.skipTo) { entries = entries.slice(options.skipTo, entries.length); }
         for (const entry of entries) {
             let data = await this.getMangaData(entry);
             if (data) {
@@ -353,10 +202,12 @@ export class BTTScrapper {
                     }
                 });
                 this.sendMangaToDatabase(data, manga && manga[0] ? manga[0] : undefined).then(res => {
+                    if (!res) console.log(`Something went wrong during adding ${data.name} to database`);
                     console.log(res.name + ' added to database. ' + res.chapters.length + ' chapter count');
                 });
             }
         }
+        console.log('SPIDER WORK IS DONE. HE IS GOING TO SLEEP NOW.')
     }
 
 }

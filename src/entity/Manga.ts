@@ -64,11 +64,6 @@ export class Manga {
     description: string;
 
     @Column({
-        default: 1,
-    })
-    starting_chapter: number;
-
-    @Column({
         default: false,
     })
     isApproved: boolean;

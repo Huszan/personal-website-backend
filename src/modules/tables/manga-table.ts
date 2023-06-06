@@ -3,7 +3,10 @@ import {Manga} from "../../entity/Manga";
 import {MangaType} from "../../types/manga.type";
 import * as HtmlLocateTable from "../tables/html-locate-table";
 import * as LikeTable from "../tables/like-table";
+import * as ChapterTable from "../tables/chapter-table";
+import * as PageTable from "../tables/page-table";
 import {FindManyOptions, Like} from "typeorm";
+import {HtmlLocate} from "../../entity/HtmlLocate";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -18,6 +21,7 @@ export async function read(options?: FindManyOptions<Manga>, bigSearch?: string)
         .createQueryBuilder("manga")
         .leftJoinAndSelect("manga.likes", "likes")
         .leftJoinAndSelect("manga.chapters", "chapters")
+        .leftJoinAndSelect("chapters.pages", "pages")
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
         .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
 
@@ -27,8 +31,9 @@ export async function read(options?: FindManyOptions<Manga>, bigSearch?: string)
                 name: Like(`%${bigSearch}%`),
             }
         }
-        query = query.setFindOptions(options);
+        query.setFindOptions(options);
     }
+
     return query
         .getMany();
 }
@@ -37,7 +42,9 @@ export async function update(data: Manga, id?: number, updateDate = false) {
     let entry = await repository.findOneBy({id: id});
     if (entry) {
         for (let para in data) {
-            if (entry[para] !== data[para]) { entry[para] = data[para]; }
+            if (JSON.stringify(entry[para]) !== JSON.stringify(data[para])) {
+                entry[para] = data[para];
+            }
         }
         if (updateDate) { entry.last_update_date = new Date(); }
         return repository.save(entry);
@@ -45,9 +52,6 @@ export async function update(data: Manga, id?: number, updateDate = false) {
 }
 
 export async function remove(manga: Manga) {
-    for (let chapter of manga.chapters) {
-        await HtmlLocateTable.remove(chapter.pages_html_locate_id);
-    }
     if (manga) { return repository.remove(manga) }
 }
 
@@ -62,7 +66,6 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     entry.added_date = data.addedDate;
     entry.view_count = data.viewCount;
     entry.description = data.description;
-    entry.starting_chapter = data.startingChapter;
     entry.chapter_count = data.chapterCount;
     return entry;
 }
@@ -71,6 +74,10 @@ export function convertTableEntryToData(entry: Manga): MangaType {
     const likes = [];
     entry.likes.forEach(like => {
         likes.push(LikeTable.convertTableEntryToData(like));
+    })
+    const chapters = [];
+    entry.chapters.forEach(chapter => {
+        chapters.push(ChapterTable.convertTableEntryToData(chapter));
     })
     let data: MangaType = {
         id: entry.id,
@@ -83,8 +90,8 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         viewCount: entry.view_count,
         likes: likes,
         description: entry.description,
-        startingChapter: entry.starting_chapter,
         chapterCount: entry.chapter_count,
+        chapters: chapters,
     }
     return data;
 }

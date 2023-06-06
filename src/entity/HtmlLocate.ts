@@ -30,7 +30,4 @@ export class HtmlLocate {
     })
     urls: JSON
 
-    @OneToOne(() => Chapter, chapter => chapter.pages_html_locate, { onDelete: "CASCADE" })
-    chapter: Chapter;
-
 }
