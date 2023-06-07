@@ -567,9 +567,12 @@ AppDataSource.initialize().then(async () => {
         })
     });
 
+    AdvancedScrapper.axiosSetup();
+
     let bttScrapper = new BTTScrapper();
     bttScrapper.sendSpider({
         saveEntries: true,
+        skipTo: 2185,
     });
 
 }).catch(error => console.log(error))

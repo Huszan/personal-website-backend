@@ -192,7 +192,13 @@ export class BTTScrapper {
         let entries: any[] = await this.getEntries(
             options.entryAmount ? options.entryAmount : undefined,
             options.saveEntries);
-        if (options.skipTo && entries.length > options.skipTo) { entries = entries.slice(options.skipTo, entries.length); }
+        if (options.skipTo && entries.length > options.skipTo) {
+            entries = entries.slice(
+                options.skipTo,
+                options.entryAmount
+                    ? options.skipTo + options.entryAmount
+                    : entries.length);
+        }
         for (const entry of entries) {
             let data = await this.getMangaData(entry);
             if (data) {
