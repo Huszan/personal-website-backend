@@ -2,11 +2,38 @@ import {Cheerio, CheerioAPI, Element} from "cheerio";
 import {HtmlLocateType} from "../../types/html-locate.type";
 import {MangaType} from "../../types/manga.type";
 import {PageType} from "../../types/page.type";
+import {AxiosInstance} from "axios";
 
 const axios = require("axios");
+const { ConcurrencyManager } = require("axios-concurrency");
 const cheerio = require("cheerio");
 
 export class AdvancedScrapper {
+
+    private static axiosInstance: AxiosInstance;
+    private static manager;
+
+    static axiosSetup() {
+        this.axiosInstance = axios.create();
+        this.axiosInstance.interceptors.response.use(
+            response => response,
+            error => {
+                const { config, response } = error;
+                const retryCount = config.retryCount || 0;
+
+                if (!response && retryCount < 5) {
+                    config.retryCount = retryCount + 1;
+
+                    const delay = retryCount * 1000;
+                    return new Promise(resolve => setTimeout(() => resolve(
+                        this.axiosInstance(config)), delay));
+                }
+
+                throw error;
+            }
+        );
+        this.manager = ConcurrencyManager(this.axiosInstance, 5);
+    }
 
     static async gatherEntries(locate: HtmlLocateType) {
         const gathered = [];
@@ -34,9 +61,11 @@ export class AdvancedScrapper {
         try {
             let chapters: any = [];
             if (localisation.chapters) {
-                let chapterNames = await this.gatherEntries(localisation.chapters.name);
-                let chapterLinks = await this.gatherEntries(localisation.chapters.url);
-                for (let i = 0; i < chapterNames.length; i++) {
+                let [chapterNames, chapterLinks] = await Promise.all([
+                    this.gatherEntries(localisation.chapters.name),
+                    this.gatherEntries(localisation.chapters.url)
+                ]);
+                await Promise.all(chapterNames.map(async (chapterName, i) => {
                     process.stdout.write(`\rProcessing ${i}/${chapterNames.length}\r`);
                     let pagesLocate = JSON.parse(JSON.stringify(localisation.pages));
                     if (beforeUrl) {
@@ -51,13 +80,16 @@ export class AdvancedScrapper {
                     }
                     if (pages.length > 0) {
                         chapters.push({
-                            name: chapterNames[i],
+                            name: chapterName,
                             pages: pages,
+                            index: i,
                         })
                     }
-                }
+                }))
             }
             if (chapters.length === 0) { return null }
+            chapters.sort((a, b) => a.index - b.index);
+
             let manga = {
                 name: localisation.name ? await this.gatherEntries(localisation.name) : null,
                 pic: localisation.pic ? await this.gatherEntries(localisation.pic) : null,
@@ -113,7 +145,7 @@ export class AdvancedScrapper {
     private static async getPageData(urls: string[]): Promise<CheerioAPI> {
         try {
             for (let i = 0; i < urls.length; i++) {
-                const response = await axios.get(urls[i]);
+                const response = await this.axiosInstance.get(urls[i]);
                 const data = cheerio.load(response.data);
                 if (data && response.status === 200) return data;
             }
