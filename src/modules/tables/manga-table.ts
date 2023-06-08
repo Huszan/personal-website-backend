@@ -21,7 +21,6 @@ export async function read(options?: FindManyOptions<Manga>, bigSearch?: string)
         .createQueryBuilder("manga")
         .leftJoinAndSelect("manga.likes", "likes")
         .leftJoinAndSelect("manga.chapters", "chapters")
-        .leftJoinAndSelect("chapters.pages", "pages")
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
         .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
 
@@ -53,6 +52,12 @@ export async function update(data: Manga, id?: number, updateDate = false) {
 
 export async function remove(manga: Manga) {
     if (manga) { return repository.remove(manga) }
+}
+
+export async function increaseViewCount(id: number) {
+    let entry = await repository.findOneBy({id: id});
+    entry.view_count = entry.view_count+1;
+    return update(entry, id);
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {

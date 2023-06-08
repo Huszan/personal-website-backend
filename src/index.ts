@@ -19,6 +19,7 @@ import {getRandomString, sendPasswordResetEmail} from "./modules/account-handler
 import {AdvancedScrapper} from "./modules/scrapper/advanced-scrapper";
 import {HtmlLocateType} from "./types/html-locate.type";
 import {BTTScrapper} from "./modules/scrapper/b-t-t-scrapper";
+import {ChapterType} from "./types/chapter.type";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -48,18 +49,16 @@ AppDataSource.initialize().then(async () => {
     });
 
     app.post("/getMangaPages", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga;
-        let chapter: number = req.body.chapter;
+        let mangaId: number = req.body.mangaId;
+        let chapter: ChapterType = req.body.chapter;
         PageTable.read({
             where: {
-                chapter: manga.chapters[chapter]
+                chapter: chapter
             }
         })
             .then((results: any) => {
                 res.send(results);
-                let data = MangaTable.convertDataToTableEntry(manga);
-                data.view_count++;
-                MangaTable.update(data, manga.id)
+                MangaTable.increaseViewCount(mangaId);
             })
     })
 
@@ -103,7 +102,7 @@ AppDataSource.initialize().then(async () => {
     app.post("/removeManga", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
         let tableEntry = MangaTable.convertDataToTableEntry(manga);
-        MangaTable.remove(tableEntry).then(() => {
+        MangaTable.remove(tableEntry).then((mangaRemoved) => {
             res.send({
                 success: true
             });
@@ -569,10 +568,10 @@ AppDataSource.initialize().then(async () => {
 
     AdvancedScrapper.axiosSetup();
 
-    let bttScrapper = new BTTScrapper();
-    bttScrapper.sendSpider({
-        saveEntries: true,
-        skipTo: 2185,
-    });
+    // let bttScrapper = new BTTScrapper();
+    // bttScrapper.sendSpider({
+    //     saveEntries: true,
+    //     skipTo: 15031,
+    // });
 
 }).catch(error => console.log(error))
