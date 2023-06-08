@@ -59,14 +59,19 @@ export function convertDataToTableEntry(data: ChapterType): Chapter {
 }
 
 export function convertTableEntryToData(entry: Chapter): ChapterType {
-    let pages: PageType[] = [];
-    for (let page of entry.pages) {
-        pages.push(PageTable.convertTableEntryToData(page));
-    }
     let data: ChapterType = {
         id: entry.id,
         name: entry.name,
-        pages: pages,
+    }
+    if (entry.pages) {
+        let pages: PageType[] = [];
+        for (let page of entry.pages) {
+            pages.push(PageTable.convertTableEntryToData(page));
+        }
+        data = {
+            ...data,
+            pages: pages,
+        }
     }
     return data;
 }
