@@ -16,6 +16,11 @@ export class Manga {
 
     @Column({
         type: 'longtext',
+    })
+    original_name: string;
+
+    @Column({
+        type: 'longtext',
         nullable: true,
     })
     pic: string;
@@ -46,12 +51,12 @@ export class Manga {
     @Column({
         default: 0
     })
-    like_count: number;
+    chapter_count: number;
 
     @Column({
         default: 0
     })
-    chapter_count: number;
+    like_count: number;
 
     @OneToMany(() => Like, (like) => like.manga, { cascade: true, onDelete: "CASCADE" })
     @JoinColumn()
@@ -69,6 +74,7 @@ export class Manga {
     isApproved: boolean;
 
     @OneToMany(() => Chapter, chapter => chapter.manga, { cascade: true, onDelete: "CASCADE" })
+    @JoinColumn()
     chapters: Chapter[];
 
 }

@@ -20,6 +20,7 @@ import {AdvancedScrapper} from "./modules/scrapper/advanced-scrapper";
 import {HtmlLocateType} from "./types/html-locate.type";
 import {BTTScrapper} from "./modules/scrapper/b-t-t-scrapper";
 import {ChapterType} from "./types/chapter.type";
+import {RepositoryFindOptions} from "./types/repository-find-options";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -110,10 +111,10 @@ AppDataSource.initialize().then(async () => {
     })
 
     app.post("/getMangaList", (req: any, res: any) => {
-        let options: FindManyOptions<Manga> | undefined = req.body.options as FindManyOptions<Manga>;
+        let options: RepositoryFindOptions | undefined = req.body.options as RepositoryFindOptions;
         let bigSearch: string | undefined = req.body.bigSearch;
 
-        MangaTable.read(options, bigSearch)
+        MangaTable.read(options)
             .then((mangaList: any) => {
                 let convertedList: MangaType[] = [];
                 mangaList.forEach(el => {
@@ -151,6 +152,7 @@ AppDataSource.initialize().then(async () => {
                 if (like) {
                     LikeTable.remove(like.id)
                         .then(like => {
+                            MangaTable.update(like.manga_id);
                             res.send({
                                 status: 1,
                                 message: 'Your dislike has been noticed',
@@ -169,6 +171,7 @@ AppDataSource.initialize().then(async () => {
                     const like = LikeTable.convertDataToTableEntry(likeData);
                     LikeTable.create(like)
                         .then(like => {
+                            MangaTable.update(like.manga_id);
                             res.send({
                                 status: 1,
                                 message: 'You like has been noticed',
@@ -573,5 +576,7 @@ AppDataSource.initialize().then(async () => {
     //     saveEntries: true,
     //     skipTo: 15031,
     // });
+
+    MangaTable.updateCounts();
 
 }).catch(error => console.log(error))

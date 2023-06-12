@@ -157,9 +157,10 @@ export class BTTScrapper {
         let dbManga = manga ? manga : new Manga();
         // Temporary solution to not create duplicates
         if (manga) {
-            return MangaTable.update(dbManga, dbManga.id);
+            return MangaTable.update(dbManga.id, dbManga);
         }
         dbManga.name = data.name;
+        dbManga.original_name = data.name;
         dbManga.pic = data.pic;
         dbManga.description = data.description;
         dbManga.genres = JSON.parse(JSON.stringify(data.genres));
@@ -204,7 +205,8 @@ export class BTTScrapper {
             if (data) {
                 let manga = await MangaTable.read({
                     where: {
-                        name: data.name
+                        element: 'manga.original_name',
+                        value: data.name,
                     }
                 });
                 this.sendMangaToDatabase(data, manga && manga[0] ? manga[0] : undefined).then(res => {

@@ -1,44 +1,62 @@
 import {AppDataSource} from "../../data-source";
 import {Manga} from "../../entity/Manga";
 import {MangaType} from "../../types/manga.type";
-import * as HtmlLocateTable from "../tables/html-locate-table";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
-import * as PageTable from "../tables/page-table";
-import {FindManyOptions, Like} from "typeorm";
-import {HtmlLocate} from "../../entity/HtmlLocate";
+import {RepositoryFindOptions} from "../../types/repository-find-options";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
 export async function create(data: Manga) {
+    if (data.likes) data.like_count = data.likes.length;
+    if (data.chapters) data.chapter_count = data.chapters.length;
     data.added_date = new Date();
     data.last_update_date = new Date();
     return repository.save(data);
 }
 
-export async function read(options?: FindManyOptions<Manga>, bigSearch?: string) {
+export async function read(options?: RepositoryFindOptions) {
     let query = repository
         .createQueryBuilder("manga")
-        .leftJoinAndSelect("manga.likes", "likes")
-        .leftJoinAndSelect("manga.chapters", "chapters")
-        .loadRelationCountAndMap('manga.like_count', 'manga.likes')
+        .leftJoinAndSelect("manga.chapters", "chapter")
+        .leftJoinAndSelect("manga.likes", "like")
         .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
+        .loadRelationCountAndMap('manga.like_count', 'manga.likes')
 
     if (options) {
-        if (bigSearch) {
-            options.where = {
-                name: Like(`%${bigSearch}%`),
+        if (options.where) {
+            if (options.where.useLike) {
+                query.where(
+                    `${options.where.element} LIKE :search`,
+                    { search: `%${options.where.value}%` }
+                )
+            }
+            else {
+                query.where(
+                    `${options.where.element} = ${options.where.value}`
+                )
             }
         }
-        query.setFindOptions(options);
+        if (options.order) {
+            query.orderBy(
+                options.order.element,
+                options.order.sort,
+            );
+        }
+        if (options.take) query.take(options.take);
+        if (options.skip) query.skip(options.skip);
     }
-
-    return query
-        .getMany();
+    return query.getMany();
 }
 
-export async function update(data: Manga, id?: number, updateDate = false) {
-    let entry = await repository.findOneBy({id: id});
+export async function update(id: number, data?: Manga, updateDate = false) {
+    let entries = await read({
+        where: {
+            element: 'manga.id',
+            value: id,
+        }
+    });
+    let entry = entries[0];
     if (entry) {
         for (let para in data) {
             if (JSON.stringify(entry[para]) !== JSON.stringify(data[para])) {
@@ -57,7 +75,25 @@ export async function remove(manga: Manga) {
 export async function increaseViewCount(id: number) {
     let entry = await repository.findOneBy({id: id});
     entry.view_count = entry.view_count+1;
-    return update(entry, id);
+    return update(id, entry);
+}
+
+async function getMangaCount() {
+    let result = await repository
+        .createQueryBuilder()
+        .select("COUNT(*)", "count")
+        .getRawOne();
+    return parseInt(result.count);
+}
+
+export async function updateCounts() {
+    let count = await getMangaCount();
+    for (let i = 0; i < count; i++) {
+        let entries = await read({take: 1, skip: i})
+        let entry = entries[0];
+        await update(entry.id, entry);
+        process.stdout.write(`Updated ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+    }
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {
