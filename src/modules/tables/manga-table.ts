@@ -4,6 +4,7 @@ import {MangaType} from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
 import {RepositoryFindOptions} from "../../types/repository-find-options";
+import {In, Like} from "typeorm";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -24,17 +25,26 @@ export async function read(options?: RepositoryFindOptions) {
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
 
     if (options) {
+        let i = 0;
         if (options.where) {
-            if (options.where.useLike) {
-                query.where(
-                    `${options.where.element} LIKE :search`,
-                    { search: `%${options.where.value}%` }
-                )
-            }
-            else {
-                query.where(
-                    `${options.where.element} = ${options.where.value}`
-                )
+            for (let option of options.where) {
+                if (option.specialType)  {
+
+                    switch (option.specialType) {
+                        case 'like': {
+                            query.andWhere(
+                                `${option.element} LIKE :search${i}`,
+                                { [`search${i}`]: `%${option.value}%` }
+                            );
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    query.andWhere(
+                        `${option.element} = ${option.value}`
+                    )
+                }
             }
         }
         if (options.order) {
@@ -51,10 +61,12 @@ export async function read(options?: RepositoryFindOptions) {
 
 export async function update(id: number, data?: Manga, updateDate = false) {
     let entries = await read({
-        where: {
-            element: 'manga.id',
-            value: id,
-        }
+        where: [
+            {
+                element: 'manga.id',
+                value: id,
+            }
+        ]
     });
     let entry = entries[0];
     if (entry) {
@@ -86,14 +98,33 @@ async function getMangaCount() {
     return parseInt(result.count);
 }
 
-export async function updateCounts() {
+export async function updateCounts(amountPerRead = 1000) {
     let count = await getMangaCount();
-    for (let i = 0; i < count; i++) {
-        let entries = await read({take: 1, skip: i})
-        let entry = entries[0];
-        await update(entry.id, entry);
-        process.stdout.write(`Updated ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+    for (let i = 0; i < count; i += amountPerRead) {
+        let entries = await read({take: amountPerRead, skip: i})
+        for (const entry of entries) {
+            await update(entry.id, entry);
+            process.stdout.write(`Updated ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+        }
     }
+}
+
+export async function readTags(amountPerRead = 1000) {
+    let count = await getMangaCount();
+    let tags = [];
+    for (let i = 0; i < count; i += amountPerRead) {
+        let entries = await read({take: amountPerRead, skip: i})
+        for (const entry of entries) {
+            let genres = entry.tags;
+            for (const tag of genres) {
+                if (!tags.includes(tag.trim().toLowerCase())) {
+                    tags.push(tag.trim().toLowerCase());
+                }
+            }
+        }
+        process.stdout.write(`Read ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+    }
+    return tags;
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {
@@ -101,8 +132,8 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     if(data.id) entry.id = data.id;
     entry.name = data.name;
     entry.pic = data.pic;
-    if (data.authors) entry.authors = JSON.parse(JSON.stringify(data.authors))
-    if (data.genres) entry.genres = JSON.parse(JSON.stringify(data.genres));
+    if (data.authors) entry.authors = data.authors;
+    if (data.tags) entry.tags = data.tags;
     entry.last_update_date = data.lastUpdateDate;
     entry.added_date = data.addedDate;
     entry.view_count = data.viewCount;
@@ -124,8 +155,8 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         id: entry.id,
         name: entry.name,
         pic: entry.pic,
-        authors: JSON.parse(JSON.stringify(entry.authors)),
-        genres: JSON.parse(JSON.stringify(entry.genres)),
+        authors: entry.authors,
+        tags: entry.tags,
         lastUpdateDate: entry.last_update_date,
         addedDate: entry.added_date,
         viewCount: entry.view_count,

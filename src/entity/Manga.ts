@@ -25,17 +25,11 @@ export class Manga {
     })
     pic: string;
 
-    @Column({
-        type: 'json',
-        nullable: true,
-    })
-    authors: JSON;
+    @Column("simple-array", {nullable: true})
+    authors: string[];
 
-    @Column({
-        type: 'json',
-        nullable: true,
-    })
-    genres: JSON;
+    @Column("simple-array", {nullable: true})
+    tags: string[];
 
     @Column()
     last_update_date: Date;
