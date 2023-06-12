@@ -163,8 +163,8 @@ export class BTTScrapper {
         dbManga.original_name = data.name;
         dbManga.pic = data.pic;
         dbManga.description = data.description;
-        dbManga.genres = JSON.parse(JSON.stringify(data.genres));
-        dbManga.authors = JSON.parse(JSON.stringify(data.authors));
+        dbManga.tags = data.genres;
+        dbManga.authors = data.authors;
         dbManga.description = data.description;
         let dbChapters: Chapter[] = manga ? manga.chapters : [];
         for (let chapter of data.chapters) {
@@ -204,10 +204,12 @@ export class BTTScrapper {
             let data = await this.getMangaData(entry);
             if (data) {
                 let manga = await MangaTable.read({
-                    where: {
-                        element: 'manga.original_name',
-                        value: data.name,
-                    }
+                    where: [
+                        {
+                            element: 'manga.original_name',
+                            value: data.name,
+                        }
+                    ]
                 });
                 this.sendMangaToDatabase(data, manga && manga[0] ? manga[0] : undefined).then(res => {
                     if (!res) console.log(`Something went wrong during adding ${data.name} to database`);

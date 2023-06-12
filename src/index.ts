@@ -577,6 +577,4 @@ AppDataSource.initialize().then(async () => {
     //     skipTo: 15031,
     // });
 
-    MangaTable.updateCounts();
-
 }).catch(error => console.log(error))

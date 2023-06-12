@@ -6,7 +6,7 @@ export interface MangaType {
     name: string;
     pic: string;
     authors: string[];
-    genres: string[];
+    tags: string[];
     chapters: ChapterType[];
     likes: LikeType[];
     lastUpdateDate: Date;
