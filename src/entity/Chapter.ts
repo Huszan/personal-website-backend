@@ -18,7 +18,6 @@ export class Chapter {
     pages: Page[];
 
     @ManyToOne(() => Manga, { onDelete: "CASCADE" })
-    @JoinColumn()
     manga: Manga;
 
 }
