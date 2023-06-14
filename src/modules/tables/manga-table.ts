@@ -4,7 +4,8 @@ import {MangaType} from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
 import {RepositoryFindOptions} from "../../types/repository-find-options";
-import {In, Like} from "typeorm";
+import {In, Like, QueryBuilder, SelectQueryBuilder} from "typeorm";
+import {query} from "express";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -24,38 +25,7 @@ export async function read(options?: RepositoryFindOptions) {
         .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
 
-    if (options) {
-        let i = 0;
-        if (options.where) {
-            for (let option of options.where) {
-                if (option.specialType)  {
-
-                    switch (option.specialType) {
-                        case 'like': {
-                            query.andWhere(
-                                `${option.element} LIKE :search${i}`,
-                                { [`search${i}`]: `%${option.value}%` }
-                            );
-                            i++;
-                            break;
-                        }
-                    }
-                } else {
-                    query.andWhere(
-                        `${option.element} = ${option.value}`
-                    )
-                }
-            }
-        }
-        if (options.order) {
-            query.orderBy(
-                options.order.element,
-                options.order.sort,
-            );
-        }
-        if (options.take) query.take(options.take);
-        if (options.skip) query.skip(options.skip);
-    }
+    query = applyOptionsToQuery(query, options);
     return query.getMany();
 }
 
@@ -90,12 +60,23 @@ export async function increaseViewCount(id: number) {
     return update(id, entry);
 }
 
-async function getMangaCount() {
-    let result = await repository
-        .createQueryBuilder()
+export async function getMangaCount(options?: RepositoryFindOptions) {
+    let query = await repository
+        .createQueryBuilder("manga")
         .select("COUNT(*)", "count")
-        .getRawOne();
+    query = applyWhereOptions(query, options);
+
+    let result = await query.getRawOne();
     return parseInt(result.count);
+}
+
+export async function getMangaList(options?: RepositoryFindOptions) {
+    let mangaList = await read(options);
+    let mangaCount = await getMangaCount(options);
+    return {
+        list: mangaList,
+        count: mangaCount,
+    }
 }
 
 export async function updateCounts(amountPerRead = 1000) {
@@ -125,6 +106,45 @@ export async function readTags(amountPerRead = 1000) {
         process.stdout.write(`Read ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
     }
     return tags;
+}
+
+export function applyOptionsToQuery(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
+    if (!options) return query;
+    query = applyWhereOptions(query, options);
+    if (options.order) {
+        query.orderBy(
+            options.order.element,
+            options.order.sort,
+        );
+    }
+    if (options.take) query.take(options.take);
+    if (options.skip) query.skip(options.skip);
+    return query;
+}
+
+function applyWhereOptions(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
+    if (!options.where) return query;
+    let i = 0;
+    for (let option of options.where) {
+        if (option.specialType)  {
+
+            switch (option.specialType) {
+                case 'like': {
+                    query.andWhere(
+                        `${option.element} LIKE :search${i}`,
+                        { [`search${i}`]: `%${option.value}%` }
+                    );
+                    i++;
+                    break;
+                }
+            }
+        } else {
+            query.andWhere(
+                `${option.element} = ${option.value}`
+            )
+        }
+    }
+    return query;
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {
