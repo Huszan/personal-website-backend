@@ -112,18 +112,17 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/getMangaList", (req: any, res: any) => {
         let options: RepositoryFindOptions | undefined = req.body.options as RepositoryFindOptions;
-        let bigSearch: string | undefined = req.body.bigSearch;
 
-        MangaTable.read(options)
-            .then((mangaList: any) => {
+        MangaTable.getMangaList(options)
+            .then((data: { list: Manga[], count: number }) => {
                 let convertedList: MangaType[] = [];
-                mangaList.forEach(el => {
+                data.list.forEach(el => {
                     convertedList.push(MangaTable.convertTableEntryToData(el));
                 })
                 convertedList.forEach(el => {
                     el.chapters = el.chapters.sort((a, b) => b.id - a.id);
                 })
-                res.send(convertedList);
+                res.send({ list: convertedList, count: data.count });
             })
     })
 
