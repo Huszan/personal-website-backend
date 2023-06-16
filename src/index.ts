@@ -3,7 +3,7 @@ import * as bodyParser from "body-parser";
 import {MangaType} from "./types/manga.type";
 import {Manga} from "./entity/Manga";
 import * as MangaTable from "./modules/tables/manga-table";
-import * as HtmlLocateTable from "./modules/tables/html-locate-table";
+import * as ChapterTable from "./modules/tables/chapter-table";
 import * as PageTable from "./modules/tables/page-table";
 import * as UserTable from "./modules/tables/user-table";
 import * as LikeTable from "./modules/tables/like-table";
@@ -49,19 +49,25 @@ AppDataSource.initialize().then(async () => {
         });
     });
 
-    app.post("/getMangaPages", async (req: any, res: any) => {
-        let mangaId: number = req.body.mangaId;
-        let chapter: ChapterType = req.body.chapter;
-        PageTable.read({
-            where: {
-                chapter: chapter
-            }
-        })
-            .then((results: any) => {
-                res.send(results);
-                MangaTable.increaseViewCount(mangaId);
-            })
-    })
+    type ContactInfo = {
+        name: string;
+        email: string;
+        subject: string;
+        message: string;
+    };
+    app.post("/sendMailMangaDot", (req: any, res: any) => {
+        let info: ContactInfo = req.body.info;
+        const body = {
+            from: info.email,
+            to: 'mangadot.contact@gmail.com',
+            subject: `Contact from Manga Dot - ${info.subject}`,
+            text: `Hi, my name is ${info.name}.\n\n\t${info.message}`
+        }
+        EmailHandler.sendCustomMail(body, (info: { messageId: any; }) => {
+            console.log(`E-mail has been sent. Id -> ${info.messageId}`);
+            res.send(info);
+        });
+    });
 
     app.post("/testMangaForm", async (req: any, res: any) => {
         // let manga: MangaType = req.body.manga || null;
@@ -114,15 +120,47 @@ AppDataSource.initialize().then(async () => {
         let options: RepositoryFindOptions | undefined = req.body.options as RepositoryFindOptions;
 
         MangaTable.getMangaList(options)
-            .then((data: { list: Manga[], count: number }) => {
+            .then(async (data: { list: Manga[], count: number }) => {
                 let convertedList: MangaType[] = [];
-                data.list.forEach(el => {
+                for (const el of data.list) {
+                    el.chapter_count = await ChapterTable.getChapterCount({where: [{element: 'manga_id', value: el.id}]});
                     convertedList.push(MangaTable.convertTableEntryToData(el));
-                })
-                convertedList.forEach(el => {
-                    el.chapters = el.chapters.sort((a, b) => b.id - a.id);
-                })
-                res.send({ list: convertedList, count: data.count });
+                }
+                res.send({list: convertedList, count: data.count});
+            })
+    })
+
+    app.post("/getMangaChapters", (req: any, res: any) => {
+        let mangaId: number = req.body.mangaId;
+        if (!mangaId) {
+            res.send([]);
+        }
+
+        ChapterTable.read({ where: [{element: 'manga_id', value: mangaId}] }).then(chapterList => {
+            let convertedList: ChapterType[] = [];
+            chapterList.sort((a, b) => b.id - a.id);
+            chapterList.forEach(chapter => {
+                convertedList.push(ChapterTable.convertTableEntryToData(chapter));
+            })
+            res.send(convertedList);
+        })
+    })
+
+    app.post("/getMangaPages", async (req: any, res: any) => {
+        let mangaId: number = req.body.mangaId;
+        let chapterId: number = req.body.chapterId;
+        if (!mangaId || !chapterId) {
+            res.send([]);
+        }
+
+        PageTable.read({
+            where: {
+                chapter_id: chapterId
+            }
+        })
+            .then((results: any) => {
+                res.send(results);
+                MangaTable.increaseViewCount(mangaId);
             })
     })
 

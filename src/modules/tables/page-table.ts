@@ -45,6 +45,7 @@ export function convertTableEntryToData(entry: Page): PageType {
     let data: PageType = {
         id: entry.id,
         url: entry.url,
+        chapterId: entry.chapter_id
     }
     return data;
 }

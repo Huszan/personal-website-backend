@@ -6,6 +6,7 @@ import * as ChapterTable from "../tables/chapter-table";
 import {RepositoryFindOptions} from "../../types/repository-find-options";
 import {In, Like, QueryBuilder, SelectQueryBuilder} from "typeorm";
 import {query} from "express";
+import {TableManager} from "./table-manager";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -20,12 +21,10 @@ export async function create(data: Manga) {
 export async function read(options?: RepositoryFindOptions) {
     let query = repository
         .createQueryBuilder("manga")
-        .leftJoinAndSelect("manga.chapters", "chapter")
         .leftJoinAndSelect("manga.likes", "like")
-        .loadRelationCountAndMap('manga.chapter_count', 'manga.chapters')
         .loadRelationCountAndMap('manga.like_count', 'manga.likes')
 
-    query = applyOptionsToQuery(query, options);
+    query = TableManager.applyOptionsToQuery(query, options);
     return query.getMany();
 }
 
@@ -64,7 +63,7 @@ export async function getMangaCount(options?: RepositoryFindOptions) {
     let query = await repository
         .createQueryBuilder("manga")
         .select("COUNT(*)", "count")
-    query = applyWhereOptions(query, options);
+    query = TableManager.applyWhereOptions(query, options);
 
     let result = await query.getRawOne();
     return parseInt(result.count);
@@ -108,45 +107,6 @@ export async function readTags(amountPerRead = 1000) {
     return tags;
 }
 
-export function applyOptionsToQuery(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
-    if (!options) return query;
-    query = applyWhereOptions(query, options);
-    if (options.order) {
-        query.orderBy(
-            options.order.element,
-            options.order.sort,
-        );
-    }
-    if (options.take) query.take(options.take);
-    if (options.skip) query.skip(options.skip);
-    return query;
-}
-
-function applyWhereOptions(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
-    if (!options.where) return query;
-    let i = 0;
-    for (let option of options.where) {
-        if (option.specialType)  {
-
-            switch (option.specialType) {
-                case 'like': {
-                    query.andWhere(
-                        `${option.element} LIKE :search${i}`,
-                        { [`search${i}`]: `%${option.value}%` }
-                    );
-                    i++;
-                    break;
-                }
-            }
-        } else {
-            query.andWhere(
-                `${option.element} = ${option.value}`
-            )
-        }
-    }
-    return query;
-}
-
 export function convertDataToTableEntry(data: MangaType): Manga {
     let entry = new Manga();
     if(data.id) entry.id = data.id;
@@ -167,10 +127,6 @@ export function convertTableEntryToData(entry: Manga): MangaType {
     entry.likes.forEach(like => {
         likes.push(LikeTable.convertTableEntryToData(like));
     })
-    const chapters = [];
-    entry.chapters.forEach(chapter => {
-        chapters.push(ChapterTable.convertTableEntryToData(chapter));
-    })
     let data: MangaType = {
         id: entry.id,
         name: entry.name,
@@ -183,7 +139,6 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         likes: likes,
         description: entry.description,
         chapterCount: entry.chapter_count,
-        chapters: chapters,
     }
     return data;
 }

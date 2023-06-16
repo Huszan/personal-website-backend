@@ -9,6 +9,15 @@ const transporter = nodemailer.createTransport({
         pass: details.password
     }
 });
+const transporterMangaDot = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: details.mangaDotMail.email,
+        pass: details.mangaDotMail.password
+    }
+});
 
 export async function sendMail(body: any, callback: any) {
     let mailOptions = {
@@ -41,7 +50,7 @@ export async function sendCustomMail(
         text: body.text
     }
     // send mail with defined transport object
-    let info = await transporter.sendMail(mailOptions);
+    let info = await transporterMangaDot.sendMail(mailOptions);
     if (callback) callback(info);
 }
 

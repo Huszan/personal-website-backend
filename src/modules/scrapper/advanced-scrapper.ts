@@ -75,7 +75,7 @@ export class AdvancedScrapper {
                     let pageEntries = await this.gatherEntries(pagesLocate);
                     for (let page of pageEntries) {
                         pages.push({
-                            url: page
+                            url: page,
                         })
                     }
                     if (pages.length > 0) {

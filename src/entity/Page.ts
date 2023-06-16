@@ -13,7 +13,11 @@ export class Page {
     })
     url: string
 
+    @Column()
+    chapter_id: number
+
     @ManyToOne(() => Chapter, { onDelete: "CASCADE" })
+    @JoinColumn({name : 'chapter_id', referencedColumnName: 'id'})
     chapter: Chapter;
 
 }
