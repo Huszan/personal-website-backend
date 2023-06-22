@@ -35,11 +35,25 @@ const productionDataSource = new DataSource({
     subscribers: [],
 })
 
-let dataSource = productionDataSource;
+const productionDataSourceNew = new DataSource({
+    type: "mysql",
+    host: "mangadot.cjseywmjwkbz.eu-north-1.rds.amazonaws.com",
+    port: 3306,
+    username: "admin",
+    password: "For1311$",
+    database: "pwmain",
+    synchronize: true,
+    logging: false,
+    entities: [HtmlLocate, Manga, Like, User, Chapter, Page],
+    migrations: [],
+    subscribers: [],
+})
+
+let dataSource = productionDataSourceNew;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
-    dataSource = localDataSource;
+    dataSource = productionDataSourceNew;
 }
 
 export const AppDataSource = dataSource;
