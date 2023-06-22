@@ -35,11 +35,25 @@ const productionDataSource = new DataSource({
     subscribers: [],
 })
 
-let dataSource = productionDataSource;
+const productionDataSourceNew = new DataSource({
+    type: "mysql",
+    host: "***REMOVED***",
+    port: 3306,
+    username: "admin",
+    password: "***REMOVED***",
+    database: "***REMOVED***",
+    synchronize: true,
+    logging: false,
+    entities: [HtmlLocate, Manga, Like, User, Chapter, Page],
+    migrations: [],
+    subscribers: [],
+})
+
+let dataSource = productionDataSourceNew;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
-    dataSource = localDataSource;
+    dataSource = productionDataSourceNew;
 }
 
 export const AppDataSource = dataSource;
