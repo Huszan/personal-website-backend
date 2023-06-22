@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
 import {Manga} from "./Manga";
+import {Chapter} from "./Chapter";
 
 @Entity()
 export class HtmlLocate {
@@ -28,9 +29,5 @@ export class HtmlLocate {
         nullable: true,
     })
     urls: JSON
-
-    @OneToOne(() => Manga, manga => manga.html_locate, { onDelete: "CASCADE" })
-    @JoinColumn()
-    manga: Manga
 
 }

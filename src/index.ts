@@ -1,10 +1,10 @@
 import { AppDataSource } from "./data-source"
 import * as bodyParser from "body-parser";
-import * as scrapper from "./modules/scrapper";
 import {MangaType} from "./types/manga.type";
 import {Manga} from "./entity/Manga";
 import * as MangaTable from "./modules/tables/manga-table";
-import * as HtmlLocateTable from "./modules/tables/html-locate-table";
+import * as ChapterTable from "./modules/tables/chapter-table";
+import * as PageTable from "./modules/tables/page-table";
 import * as UserTable from "./modules/tables/user-table";
 import * as LikeTable from "./modules/tables/like-table";
 import * as EmailHandler from "./modules/email-handler";
@@ -16,6 +16,11 @@ import {LikeType} from "./types/like.type";
 import {FindManyOptions} from "typeorm";
 import {UserType} from "./types/user.type";
 import {getRandomString, sendPasswordResetEmail} from "./modules/account-handler";
+import {AdvancedScrapper} from "./modules/scrapper/advanced-scrapper";
+import {HtmlLocateType} from "./types/html-locate.type";
+import {BTTScrapper} from "./modules/scrapper/b-t-t-scrapper";
+import {ChapterType} from "./types/chapter.type";
+import {RepositoryFindOptions} from "./types/repository-find-options";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -44,41 +49,51 @@ AppDataSource.initialize().then(async () => {
         });
     });
 
-    app.post("/getMangaPages", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga;
-        let chapter: number = req.body.chapter;
-        scrapper.getMangaPages(chapter, manga.htmlLocate)
-            .then((results: any) => {
-                res.send(results);
-                let data = MangaTable.convertDataToTableEntry(manga);
-                data.view_count++;
-                MangaTable.update(data, manga.id)
-            })
-    })
+    type ContactInfo = {
+        name: string;
+        email: string;
+        subject: string;
+        message: string;
+    };
+    app.post("/sendMailMangaDot", (req: any, res: any) => {
+        let info: ContactInfo = req.body.info;
+        const body = {
+            from: info.email,
+            to: '***REMOVED***',
+            subject: `Contact from Manga Dot - ${info.subject}`,
+            text: `Hi, my name is ${info.name}.\n\n\t${info.message}`
+        }
+        EmailHandler.sendCustomMail(body, (info: { messageId: any; }) => {
+            console.log(`E-mail has been sent. Id -> ${info.messageId}`);
+            res.send(info);
+        });
+    });
 
     app.post("/testMangaForm", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga || null;
-        let testId = req.body.testId || null;
-        if (testId) {
-            scrapper.continueTest(manga, testId)
-                .then((results: any) => {
-                    res.send(results);
-                })
-        } else {
-            scrapper.testMangaForm(manga)
-                .then((results: any) => {
-                    res.send(results);
-                })
-        }
+        // let manga: MangaType = req.body.manga || null;
+        // let testId = req.body.testId || null;
+        // if (testId) {
+        //     scrapper.continueTest(manga, testId)
+        //         .then((results: any) => {
+        //             res.send(results);
+        //         })
+        // } else {
+        //     scrapper.testMangaForm(manga)
+        //         .then((results: any) => {
+        //             res.send(results);
+        //         })
+        // }
+        res.send(false);
     })
 
     app.post("/testMangaChapter", async (req: any, res: any) => {
-        let manga: MangaType = req.body.manga || null;
-        let chapter = req.body.chapter || null;
-        scrapper.testMangaChapter(manga, chapter)
-            .then((passed: any) => {
-                res.send(passed);
-            })
+        // let manga: MangaType = req.body.manga || null;
+        // let chapter = req.body.chapter || null;
+        // scrapper.testMangaChapter(manga, chapter)
+        //     .then((passed: any) => {
+        //         res.send(passed);
+        //     })
+        res.send(false);
     })
 
     app.post("/createManga", async (req: any, res: any) => {
@@ -93,7 +108,8 @@ AppDataSource.initialize().then(async () => {
 
     app.post("/removeManga", async (req: any, res: any) => {
         let manga: MangaType = req.body.manga;
-        MangaTable.remove(manga.id).then(() => {
+        let tableEntry = MangaTable.convertDataToTableEntry(manga);
+        MangaTable.remove(tableEntry).then((mangaRemoved) => {
             res.send({
                 success: true
             });
@@ -101,16 +117,50 @@ AppDataSource.initialize().then(async () => {
     })
 
     app.post("/getMangaList", (req: any, res: any) => {
-        let options: FindManyOptions<Manga> | undefined = req.body.options as FindManyOptions<Manga>;
-        let bigSearch: string | undefined = req.body.bigSearch;
+        let options: RepositoryFindOptions | undefined = req.body.options as RepositoryFindOptions;
 
-        MangaTable.read(options, bigSearch)
-            .then((mangaList: any) => {
-                let convertedList = [];
-                mangaList.forEach(el => {
+        MangaTable.getMangaList(options)
+            .then(async (data: { list: Manga[], count: number }) => {
+                let convertedList: MangaType[] = [];
+                for (const el of data.list) {
+                    el.chapter_count = await ChapterTable.getChapterCount({where: [{element: 'manga_id', value: el.id}]});
                     convertedList.push(MangaTable.convertTableEntryToData(el));
-                })
-                res.send(convertedList);
+                }
+                res.send({list: convertedList, count: data.count});
+            })
+    })
+
+    app.post("/getMangaChapters", (req: any, res: any) => {
+        let mangaId: number = req.body.mangaId;
+        if (!mangaId) {
+            res.send([]);
+        }
+
+        ChapterTable.read({ where: [{element: 'manga_id', value: mangaId}] }).then(chapterList => {
+            let convertedList: ChapterType[] = [];
+            chapterList.sort((a, b) => b.id - a.id);
+            chapterList.forEach(chapter => {
+                convertedList.push(ChapterTable.convertTableEntryToData(chapter));
+            })
+            res.send(convertedList);
+        })
+    })
+
+    app.post("/getMangaPages", async (req: any, res: any) => {
+        let mangaId: number = req.body.mangaId;
+        let chapterId: number = req.body.chapterId;
+        if (!mangaId || !chapterId) {
+            res.send([]);
+        }
+
+        PageTable.read({
+            where: {
+                chapter_id: chapterId
+            }
+        })
+            .then((results: any) => {
+                res.send(results);
+                MangaTable.increaseViewCount(mangaId);
             })
     })
 
@@ -139,6 +189,7 @@ AppDataSource.initialize().then(async () => {
                 if (like) {
                     LikeTable.remove(like.id)
                         .then(like => {
+                            MangaTable.update(like.manga_id);
                             res.send({
                                 status: 1,
                                 message: 'Your dislike has been noticed',
@@ -157,6 +208,7 @@ AppDataSource.initialize().then(async () => {
                     const like = LikeTable.convertDataToTableEntry(likeData);
                     LikeTable.create(like)
                         .then(like => {
+                            MangaTable.update(like.manga_id);
                             res.send({
                                 status: 1,
                                 message: 'You like has been noticed',
@@ -553,5 +605,13 @@ AppDataSource.initialize().then(async () => {
             AccountHandler.forgotPasswordWaitingList.splice(changeRequestIndex, 1);
         })
     });
+
+    AdvancedScrapper.axiosSetup();
+
+    // let bttScrapper = new BTTScrapper();
+    // bttScrapper.sendSpider({
+    //     saveEntries: true,
+    //     skipTo: 15031,
+    // });
 
 }).catch(error => console.log(error))
