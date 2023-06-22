@@ -53,7 +53,7 @@ let dataSource = productionDataSourceNew;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
-    dataSource = productionDataSourceNew;
+    dataSource = localDataSource;
 }
 
 export const AppDataSource = dataSource;
