@@ -35,11 +35,9 @@ AppDataSource.initialize().then(async () => {
         res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
         next();
     })
-    app.use(cors(
-        '*',
-        true,
-        200
-    ));
+    app.use(cors({
+        origin: '*'
+    }));
 
     app.post("/post", (req: any, res: any) => {
         let body = req.body;
