@@ -4,7 +4,7 @@ import {RepositoryFindOptions} from "../../types/repository-find-options";
 export class TableManager {
     static applyOptionsToQuery(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
         if (!options) return query;
-        query = TableManager.applyWhereOptions(query, options);
+        if (options.where !== undefined) query = TableManager.applyWhereOptions(query, options);
         if (options.order) {
             query.orderBy(
                 options.order.element,
@@ -17,7 +17,7 @@ export class TableManager {
     }
 
     static applyWhereOptions(query: SelectQueryBuilder<any>, options: RepositoryFindOptions) {
-        if (!options.where) return query;
+        if (!options || !options.where) return query;
         let i = 0;
         for (let option of options.where) {
             if (option.specialType)  {
