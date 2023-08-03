@@ -35,9 +35,9 @@ const productionDataSource = new DataSource({
     subscribers: [],
 })
 
-const productionDataSourceNew = new DataSource({
+const dsGoogleCloud = new DataSource({
     type: "mysql",
-    host: "mangadot.cjseywmjwkbz.eu-north-1.rds.amazonaws.com",
+    host: "34.118.113.9",
     port: 3306,
     username: "admin",
     password: "For1311$",
@@ -49,7 +49,7 @@ const productionDataSourceNew = new DataSource({
     subscribers: [],
 })
 
-let dataSource = productionDataSourceNew;
+let dataSource = dsGoogleCloud;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
