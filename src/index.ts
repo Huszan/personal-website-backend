@@ -36,7 +36,10 @@ AppDataSource.initialize().then(async () => {
         next();
     })
     app.use(cors({
-        origin: '*'
+        origin: '*',
+        method: ["GET", "POST", "DELETE", "PUT", "HEAD"],
+        responseHeader: ["Content-Type", "Origin", "Accept","Authorization","Content-Length", "X-Requested-With"],
+        maxAgeSeconds: 3600
     }));
 
     app.post("/post", (req: any, res: any) => {
