@@ -37,7 +37,7 @@ const productionDataSource = new DataSource({
 
 const dsGoogleCloud = new DataSource({
     type: "mysql",
-    host: "34.118.113.9",
+    host: "172.19.0.3",
     port: 3306,
     username: "admin",
     password: "For1311$",
@@ -53,7 +53,7 @@ let dataSource = productionDataSource;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
-    dataSource = localDataSource;
+    // dataSource = localDataSource;
 }
 
 export const AppDataSource = dataSource;
