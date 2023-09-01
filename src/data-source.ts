@@ -9,7 +9,7 @@ import {Page} from "./entity/Page";
 
 const localDataSource = new DataSource({
     type: "mysql",
-    host: "localhost",
+    host: "***REMOVED***",
     port: 3306,
     username: "root",
     password: "***REMOVED***",
@@ -49,7 +49,7 @@ const dsGoogleCloud = new DataSource({
     subscribers: [],
 })
 
-let dataSource = productionDataSource;
+let dataSource = localDataSource;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
