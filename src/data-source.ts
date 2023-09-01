@@ -11,7 +11,7 @@ const localDataSource = new DataSource({
     type: "mysql",
     host: "***REMOVED***",
     port: ***REMOVED***,
-    username: "***REMOVED***",
+    username: "root",
     password: "***REMOVED***",
     database: "***REMOVED***",
     synchronize: true,
