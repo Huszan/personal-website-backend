@@ -9,10 +9,10 @@ import {Page} from "./entity/Page";
 
 const localDataSource = new DataSource({
     type: "mysql",
-    host: "192.168.1.105",
+    host: "YatzekPC",
     port: 3111,
-    username: "jacek",
-    password: "193192191",
+    username: "root",
+    password: "For1311$",
     database: "pwmain",
     synchronize: true,
     logging: false,
