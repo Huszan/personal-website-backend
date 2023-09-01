@@ -12,7 +12,7 @@ const localDataSource = new DataSource({
     host: "192.168.1.105",
     port: 3111,
     username: "jacek",
-    password: "For1311$",
+    password: "193192191",
     database: "pwmain",
     synchronize: true,
     logging: false,
