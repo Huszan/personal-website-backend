@@ -9,7 +9,7 @@ import {Page} from "./entity/Page";
 
 const localDataSource = new DataSource({
     type: "mysql",
-    host: "25.32.26.213",
+    host: "YatzekPC",
     port: 3306,
     username: "root",
     password: "For1311$",
