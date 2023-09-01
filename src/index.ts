@@ -28,19 +28,7 @@ AppDataSource.initialize().then(async () => {
         console.log(`The server started on port ${listener.address()!.port}`);
     });
     app.use(bodyParser.json());
-    app.use(function (req: any, res: any, next: any) {
-        res.header('Access-Control-Allow-Origin', "*");
-        res.header('Access-Control-Allow-Headers', true);
-        res.header('Access-Control-Allow-Credentials', true);
-        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        next();
-    })
-    app.use(cors({
-        origin: '*',
-        method: ["GET", "POST", "DELETE", "PUT", "HEAD"],
-        responseHeader: ["Content-Type", "Origin", "Accept","Authorization","Content-Length", "X-Requested-With"],
-        maxAgeSeconds: 3600
-    }));
+    app.use(cors());
 
     app.post("/post", (req: any, res: any) => {
         let body = req.body;
