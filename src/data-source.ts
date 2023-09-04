@@ -35,11 +35,11 @@ const dsGoogleCloud = new DataSource({
     subscribers: [],
 })
 
-let dataSource = localDataSource;
+let dataSource = dsGoogleCloud;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
-    // dataSource = localDataSource;
+    dataSource = localDataSource;
 }
 
 export const AppDataSource = dataSource;
