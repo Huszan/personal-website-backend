@@ -9,8 +9,8 @@ import {Page} from "./entity/Page";
 
 const localDataSource = new DataSource({
     type: "mysql",
-    host: "192.168.1.105",
-    port: 3308,
+    host: "localhost",
+    port: 3306,
     username: "root",
     password: "For1311$$$",
     database: "pwmain",
@@ -35,7 +35,21 @@ const dsGoogleCloud = new DataSource({
     subscribers: [],
 })
 
-let dataSource = dsGoogleCloud;
+const dsKamateraBaseMaD = new DataSource({
+    type: "mysql",
+    host: "212-115-110-7.cloud-xip.com",
+    port: 3306,
+    username: "root",
+    password: "WhileFor1311$",
+    database: "pwmain",
+    synchronize: true,
+    logging: false,
+    entities: [HtmlLocate, Manga, Like, User, Chapter, Page],
+    migrations: [],
+    subscribers: [],
+})
+
+let dataSource = dsKamateraBaseMaD;
 
 if (process.env.NODE_ENV.trim() === 'development') {
     console.log('Started data source on development mode');
