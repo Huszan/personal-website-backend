@@ -9,21 +9,19 @@ import * as UserTable from "./modules/tables/user-table";
 import * as LikeTable from "./modules/tables/like-table";
 import * as EmailHandler from "./modules/email-handler";
 import * as AccountHandler from "./modules/account-handler";
-const express = require("express");
-const cors = require("cors");
-import * as ExampleData from "./modules/tables/example-data";
 import { LikeType } from "./types/like.type";
-import { FindManyOptions } from "typeorm";
 import { UserType } from "./types/user.type";
 import {
     getRandomString,
     sendPasswordResetEmail,
 } from "./modules/account-handler";
 import { AdvancedScrapper } from "./modules/scrapper/advanced-scrapper";
-import { HtmlLocateType } from "./types/html-locate.type";
-import { BTTScrapper } from "./modules/scrapper/b-t-t-scrapper";
 import { ChapterType } from "./types/chapter.type";
 import { RepositoryFindOptions } from "./types/repository-find-options";
+
+const express = require("express");
+const cors = require("cors");
+require("@dotenvx/dotenvx").config();
 
 AppDataSource.initialize()
     .then(async () => {
@@ -35,6 +33,11 @@ AppDataSource.initialize()
         });
         app.use(bodyParser.json());
         app.use(cors());
+
+        // Use this for developement purposes. Do not push changes for it.
+        app.post("/test", (req: any, res: any) => {
+            res.send();
+        });
 
         app.post("/post", (req: any, res: any) => {
             let body = req.body;

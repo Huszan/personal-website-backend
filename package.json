@@ -4,11 +4,12 @@
     "description": "",
     "type": "commonjs",
     "scripts": {
-        "start": "set NODE_ENV=production && ts-node src/index.ts",
-        "serve": "set NODE_ENV=development && ts-node src/index.ts",
+        "start": "dotenvx run --env-file=.env -- ts-node src/index.ts",
+        "serve": "dotenvx run --env-file=.env.local -- ts-node src/index.ts",
         "typeorm": "typeorm-ts-node-commonjs"
     },
     "dependencies": {
+        "@dotenvx/dotenvx": "^1.19.3",
         "axios": "^0.27.2",
         "axios-concurrency": "^1.0.4",
         "bcrypt": "^5.1.0",

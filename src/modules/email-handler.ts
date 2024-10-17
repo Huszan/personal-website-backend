@@ -1,12 +1,12 @@
 const nodemailer = require("nodemailer");
-const details = require("../../details.json");
+
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-        user: details.email,
-        pass: details.password,
+        user: process.env.MAIL_PERSONAL,
+        pass: process.env.MAIL_PERSONAL_PASS,
     },
 });
 const transporterMangaDot = nodemailer.createTransport({
@@ -14,15 +14,15 @@ const transporterMangaDot = nodemailer.createTransport({
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-        user: details.mangaDotMail.email,
-        pass: details.mangaDotMail.password,
+        user: process.env.MAIL_MD,
+        pass: process.env.MAIL_MD_PASS,
     },
 });
 
 export async function sendMail(body: any, callback: any) {
     let mailOptions = {
         from: '"Personal Website"', // sender address
-        to: details.email, // list of receivers
+        to: process.env.MAIL_PERSONAL, // list of receivers
         subject: "Contact from Personal site ✔", // Subject line
         text: `\n
     Name: ${body.name},\n
