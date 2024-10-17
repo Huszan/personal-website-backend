@@ -57,7 +57,7 @@ AppDataSource.initialize()
             let info: ContactInfo = req.body.info;
             const body = {
                 from: info.email,
-                to: "***REMOVED***",
+                to: "mangadot.contact@gmail.com",
                 subject: `Contact from Manga Dot - ${info.subject}`,
                 text: `Hi, my name is ${info.name}.\n\n\t${info.message}`,
             };

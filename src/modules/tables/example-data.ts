@@ -31,9 +31,9 @@ export const exampleMangaForm: MangaType = {
 
 export const exampleUserForm: UserType = {
     id: 10000,
-    name: "***REMOVED***",
-    email: "***REMOVED***",
-    password: "unrefinedPassword123",
+    name: "username",
+    email: "emailadress@gmail.com",
+    password: "weakpass",
     isVerified: false,
     accountType: "admin",
 };
