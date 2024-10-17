@@ -1,29 +1,27 @@
-const URL_TOKEN = '!!!';
+const URL_TOKEN = "!!!";
 
 export interface HtmlLocateType {
-    id?: number,
-    positions: string[],
-    lookedType: string,
-    lookedAttr: string,
-    urls: string[],
+    id?: number;
+    positions: string[];
+    lookedType: string;
+    lookedAttr: string;
+    urls: string[];
     filter?: {
         inner?: {
-            from?: number,
-            to?: number,
-        },
+            from?: number;
+            to?: number;
+        };
         outer?: {
-            from?: number,
-            to?: number,
-        }
-    },
+            from?: number;
+            to?: number;
+        };
+    };
 }
 
 export function replaceTokensInUrls(urls: string[], chapter: number) {
     const urlsWithReplacedToken = [];
     for (let i = 0; i < urls.length; i++) {
-        urlsWithReplacedToken.push(
-            getUrlWithToken(urls[i], chapter)
-        )
+        urlsWithReplacedToken.push(getUrlWithToken(urls[i], chapter));
     }
     return urlsWithReplacedToken;
 }

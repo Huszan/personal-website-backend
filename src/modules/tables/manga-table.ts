@@ -1,12 +1,12 @@
-import {AppDataSource} from "../../data-source";
-import {Manga} from "../../entity/Manga";
-import {MangaType} from "../../types/manga.type";
+import { AppDataSource } from "../../data-source";
+import { Manga } from "../../entity/Manga";
+import { MangaType } from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
-import {RepositoryFindOptions} from "../../types/repository-find-options";
-import {In, Like, QueryBuilder, SelectQueryBuilder} from "typeorm";
-import {query} from "express";
-import {TableManager} from "./table-manager";
+import { RepositoryFindOptions } from "../../types/repository-find-options";
+import { In, Like, QueryBuilder, SelectQueryBuilder } from "typeorm";
+import { query } from "express";
+import { TableManager } from "./table-manager";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -22,7 +22,7 @@ export async function read(options?: RepositoryFindOptions) {
     let query = repository
         .createQueryBuilder("manga")
         .leftJoinAndSelect("manga.likes", "like")
-        .loadRelationCountAndMap('manga.like_count', 'manga.likes')
+        .loadRelationCountAndMap("manga.like_count", "manga.likes");
 
     query = TableManager.applyOptionsToQuery(query, options);
     return query.getMany();
@@ -32,10 +32,10 @@ export async function update(id: number, data?: Manga, updateDate = false) {
     let entries = await read({
         where: [
             {
-                element: 'manga.id',
+                element: "manga.id",
                 value: id,
-            }
-        ]
+            },
+        ],
     });
     let entry = entries[0];
     if (entry) {
@@ -44,25 +44,29 @@ export async function update(id: number, data?: Manga, updateDate = false) {
                 entry[para] = data[para];
             }
         }
-        if (updateDate) { entry.last_update_date = new Date(); }
+        if (updateDate) {
+            entry.last_update_date = new Date();
+        }
         return repository.save(entry);
     }
 }
 
 export async function remove(manga: Manga) {
-    if (manga) { return repository.remove(manga) }
+    if (manga) {
+        return repository.remove(manga);
+    }
 }
 
 export async function increaseViewCount(id: number) {
-    let entry = await repository.findOneBy({id: id});
-    entry.view_count = entry.view_count+1;
+    let entry = await repository.findOneBy({ id: id });
+    entry.view_count = entry.view_count + 1;
     return update(id, entry);
 }
 
 export async function getMangaCount(options?: RepositoryFindOptions) {
     let query = await repository
         .createQueryBuilder("manga")
-        .select("COUNT(*)", "count")
+        .select("COUNT(*)", "count");
     query = TableManager.applyWhereOptions(query, options);
 
     let result = await query.getRawOne();
@@ -75,16 +79,18 @@ export async function getMangaList(options?: RepositoryFindOptions) {
     return {
         list: mangaList,
         count: mangaCount,
-    }
+    };
 }
 
 export async function updateCounts(amountPerRead = 1000) {
     let count = await getMangaCount();
     for (let i = 0; i < count; i += amountPerRead) {
-        let entries = await read({take: amountPerRead, skip: i})
+        let entries = await read({ take: amountPerRead, skip: i });
         for (const entry of entries) {
             await update(entry.id, entry);
-            process.stdout.write(`Updated ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+            process.stdout.write(
+                `Updated ${i}/${count}, ${Math.round((i / count) * 100)}%\r`
+            );
         }
     }
 }
@@ -93,7 +99,7 @@ export async function readTags(amountPerRead = 1000) {
     let count = await getMangaCount();
     let tags = [];
     for (let i = 0; i < count; i += amountPerRead) {
-        let entries = await read({take: amountPerRead, skip: i})
+        let entries = await read({ take: amountPerRead, skip: i });
         for (const entry of entries) {
             let genres = entry.tags;
             for (const tag of genres) {
@@ -102,14 +108,16 @@ export async function readTags(amountPerRead = 1000) {
                 }
             }
         }
-        process.stdout.write(`Read ${i}/${count}, ${Math.round(i / count * 100)}%\r`);
+        process.stdout.write(
+            `Read ${i}/${count}, ${Math.round((i / count) * 100)}%\r`
+        );
     }
     return tags;
 }
 
 export function convertDataToTableEntry(data: MangaType): Manga {
     let entry = new Manga();
-    if(data.id) entry.id = data.id;
+    if (data.id) entry.id = data.id;
     entry.name = data.name;
     entry.pic = data.pic;
     if (data.authors) entry.authors = data.authors;
@@ -124,9 +132,9 @@ export function convertDataToTableEntry(data: MangaType): Manga {
 
 export function convertTableEntryToData(entry: Manga): MangaType {
     const likes = [];
-    entry.likes.forEach(like => {
+    entry.likes.forEach((like) => {
         likes.push(LikeTable.convertTableEntryToData(like));
-    })
+    });
     let data: MangaType = {
         id: entry.id,
         name: entry.name,
@@ -139,6 +147,6 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         likes: likes,
         description: entry.description,
         chapterCount: entry.chapter_count,
-    }
+    };
     return data;
 }

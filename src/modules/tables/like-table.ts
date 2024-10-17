@@ -1,9 +1,9 @@
-import {AppDataSource} from "../../data-source";
-import {LikeType} from "../../types/like.type";
-import {Like} from "../../entity/Like";
+import { AppDataSource } from "../../data-source";
+import { LikeType } from "../../types/like.type";
+import { Like } from "../../entity/Like";
 import * as MangaTable from "../tables/manga-table";
 import * as UserTable from "../tables/user-table";
-import {FindManyOptions} from "typeorm";
+import { FindManyOptions } from "typeorm";
 
 export const repository = AppDataSource.manager.getRepository(Like);
 
@@ -12,8 +12,7 @@ export async function create(data: Like) {
 }
 
 export async function read(options?: FindManyOptions<Like>) {
-    let query = repository
-        .createQueryBuilder("like")
+    let query = repository.createQueryBuilder("like");
     if (options) query = query.setFindOptions(options);
     return query.getMany();
 }
@@ -23,8 +22,10 @@ export async function update(data: Like) {
 }
 
 export async function remove(id?: number) {
-    let entry = await repository.findOneBy({id: id});
-    if (entry) { return repository.remove(entry) }
+    let entry = await repository.findOneBy({ id: id });
+    if (entry) {
+        return repository.remove(entry);
+    }
 }
 
 export function convertDataToTableEntry(data: LikeType): Like {
@@ -40,5 +41,5 @@ export function convertTableEntryToData(entry: Like): LikeType {
         id: entry.id,
         mangaId: entry.manga_id,
         userId: entry.user_id,
-    }
+    };
 }

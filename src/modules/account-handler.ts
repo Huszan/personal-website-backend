@@ -1,8 +1,8 @@
 import * as EmailHandler from "./email-handler";
-import {User} from "../entity/User";
+import { User } from "../entity/User";
 
 const randomstring = require("randomstring");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 export const forgotPasswordWaitingList: {
     user: User;
@@ -25,33 +25,40 @@ export async function comparePassword(password: string, hash: string) {
 export function sendConfirmationEmail(url: string, user: User, callback?: any) {
     EmailHandler.sendCustomMail(
         {
-            from: 'Manga-dot',
+            from: "Manga-dot",
             to: user.email,
-            subject: 'Manga-dot: activate account',
+            subject: "Manga-dot: activate account",
             text: `To activate your account, please click this link - 
-                                \n${url}?code=${user.verificationCode}`
+                                \n${url}?code=${user.verificationCode}`,
         },
         callback
-    )
+    );
 }
 
-export function sendPasswordResetEmail(url: string, token: string, user: User, callback?: any) {
+export function sendPasswordResetEmail(
+    url: string,
+    token: string,
+    user: User,
+    callback?: any
+) {
     EmailHandler.sendCustomMail(
         {
-            from: 'Manga-dot',
+            from: "Manga-dot",
             to: user.email,
-            subject: 'Manga-dot: activate account',
+            subject: "Manga-dot: activate account",
             text: `To reset your account password, please click this link - 
-                                \n${url}?token=${token}`
+                                \n${url}?token=${token}`,
         },
         callback()
-    )
+    );
 }
 
 export function forgotListIndexOfReq(token: string) {
     let i = 0;
     for (let entry of forgotPasswordWaitingList) {
-        if (entry.token === token) { return i; }
+        if (entry.token === token) {
+            return i;
+        }
         i++;
     }
     return null;

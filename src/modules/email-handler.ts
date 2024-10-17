@@ -6,8 +6,8 @@ const transporter = nodemailer.createTransport({
     secure: false, // true for 465, false for other ports
     auth: {
         user: details.email,
-        pass: details.password
-    }
+        pass: details.password,
+    },
 });
 const transporterMangaDot = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -15,8 +15,8 @@ const transporterMangaDot = nodemailer.createTransport({
     secure: false, // true for 465, false for other ports
     auth: {
         user: details.mangaDotMail.email,
-        pass: details.mangaDotMail.password
-    }
+        pass: details.mangaDotMail.password,
+    },
 });
 
 export async function sendMail(body: any, callback: any) {
@@ -27,7 +27,7 @@ export async function sendMail(body: any, callback: any) {
         text: `\n
     Name: ${body.name},\n
     Email: ${body.email},\n\n
-    ${body.message}` // plain text body
+    ${body.message}`, // plain text body
     };
     // send mail with defined transport object
     let info = await transporter.sendMail(mailOptions);
@@ -36,10 +36,10 @@ export async function sendMail(body: any, callback: any) {
 
 export async function sendCustomMail(
     body: {
-    from: string,
-    to: string,
-    subject: string,
-    text: string
+        from: string;
+        to: string;
+        subject: string;
+        text: string;
     },
     callback?: any
 ) {
@@ -47,10 +47,9 @@ export async function sendCustomMail(
         from: body.from, // sender address
         to: body.to, // list of receivers
         subject: body.subject, // Subject line
-        text: body.text
-    }
+        text: body.text,
+    };
     // send mail with defined transport object
     let info = await transporterMangaDot.sendMail(mailOptions);
     if (callback) callback(info);
 }
-

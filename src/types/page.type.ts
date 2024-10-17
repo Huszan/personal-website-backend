@@ -1,6 +1,5 @@
-
 export interface PageType {
-    id?: number,
-    url: string,
-    chapterId?: number,
+    id?: number;
+    url: string;
+    chapterId?: number;
 }

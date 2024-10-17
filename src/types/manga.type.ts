@@ -1,5 +1,5 @@
-import {LikeType} from "./like.type";
-import {ChapterType} from "./chapter.type";
+import { LikeType } from "./like.type";
+import { ChapterType } from "./chapter.type";
 
 export interface MangaType {
     id?: number;

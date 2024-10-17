@@ -1,23 +1,27 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
-import {Manga} from "./Manga";
-import {Chapter} from "./Chapter";
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Manga } from "./Manga";
+import { Chapter } from "./Chapter";
 
 @Entity()
 export class Page {
-
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
     })
-    url: string
+    url: string;
 
     @Column()
-    chapter_id: number
+    chapter_id: number;
 
     @ManyToOne(() => Chapter, { onDelete: "CASCADE" })
-    @JoinColumn({name : 'chapter_id', referencedColumnName: 'id'})
+    @JoinColumn({ name: "chapter_id", referencedColumnName: "id" })
     chapter: Chapter;
-
 }

@@ -1,33 +1,37 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
-import {Manga} from "./Manga";
-import {Chapter} from "./Chapter";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToOne,
+    JoinColumn,
+} from "typeorm";
+import { Manga } from "./Manga";
+import { Chapter } from "./Chapter";
 
 @Entity()
 export class HtmlLocate {
-
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column({
-        type: 'json',
+        type: "json",
         nullable: true,
     })
-    positions: JSON
+    positions: JSON;
 
     @Column({
-        default: 'img',
+        default: "img",
     })
-    looked_type: string
+    looked_type: string;
 
     @Column({
-        default: 'src',
+        default: "src",
     })
-    looked_attr: string
+    looked_attr: string;
 
     @Column({
-        type: 'json',
+        type: "json",
         nullable: true,
     })
-    urls: JSON
-
+    urls: JSON;
 }

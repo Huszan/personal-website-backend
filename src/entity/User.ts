@@ -1,39 +1,43 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn} from "typeorm"
-import {Like} from "./Like";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToMany,
+    JoinColumn,
+} from "typeorm";
+import { Like } from "./Like";
 
 @Entity()
 export class User {
-
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column()
-    name: string
+    name: string;
 
     @Column({
-        type: 'text',
+        type: "text",
     })
-    email: string
+    email: string;
 
     @Column()
-    password: string
+    password: string;
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
         nullable: true,
     })
-    verificationCode: string
+    verificationCode: string;
 
     @Column()
-    accountType: string
+    accountType: string;
 
     @Column({
         default: null,
         nullable: true,
     })
-    authToken: string
+    authToken: string;
 
     @OneToMany(() => Like, (like) => like.user)
-    likes: Like[]
-
+    likes: Like[];
 }

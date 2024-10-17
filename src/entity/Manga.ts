@@ -1,34 +1,41 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, JoinColumn, RelationCount} from "typeorm"
-import {HtmlLocate} from "./HtmlLocate";
-import {Like} from "./Like";
-import {Chapter} from "./Chapter";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToOne,
+    OneToMany,
+    JoinColumn,
+    RelationCount,
+} from "typeorm";
+import { HtmlLocate } from "./HtmlLocate";
+import { Like } from "./Like";
+import { Chapter } from "./Chapter";
 
 @Entity()
 export class Manga {
-
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
     })
     name: string;
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
     })
     original_name: string;
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
         nullable: true,
     })
     pic: string;
 
-    @Column("simple-array", {nullable: true})
+    @Column("simple-array", { nullable: true })
     authors: string[];
 
-    @Column("simple-array", {nullable: true})
+    @Column("simple-array", { nullable: true })
     tags: string[];
 
     @Column()
@@ -38,26 +45,29 @@ export class Manga {
     added_date: Date;
 
     @Column({
-        default: 0
+        default: 0,
     })
     view_count: number;
 
     @Column({
-        default: 0
+        default: 0,
     })
     chapter_count: number;
 
     @Column({
-        default: 0
+        default: 0,
     })
     like_count: number;
 
-    @OneToMany(() => Like, (like) => like.manga, { cascade: true, onDelete: "CASCADE" })
+    @OneToMany(() => Like, (like) => like.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
     @JoinColumn()
     likes: Like[];
 
     @Column({
-        type: 'longtext',
+        type: "longtext",
         nullable: true,
     })
     description: string;
@@ -67,8 +77,10 @@ export class Manga {
     })
     isApproved: boolean;
 
-    @OneToMany(() => Chapter, chapter => chapter.manga, { cascade: true, onDelete: "CASCADE" })
+    @OneToMany(() => Chapter, (chapter) => chapter.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
     @JoinColumn()
     chapters: Chapter[];
-
 }

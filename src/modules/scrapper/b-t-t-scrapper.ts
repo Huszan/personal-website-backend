@@ -1,34 +1,35 @@
-import {AdvancedScrapper} from "./advanced-scrapper";
-import {getUrlWithToken, HtmlLocateType} from "../../types/html-locate.type";
-import {Manga} from "../../entity/Manga";
-import {Chapter} from "../../entity/Chapter";
+import { AdvancedScrapper } from "./advanced-scrapper";
+import { getUrlWithToken, HtmlLocateType } from "../../types/html-locate.type";
+import { Manga } from "../../entity/Manga";
+import { Chapter } from "../../entity/Chapter";
 import * as MangaTable from "../tables/manga-table";
-import {Page} from "../../entity/Page";
+import { Page } from "../../entity/Page";
 
 const mangaLocations: HtmlLocateType[] = [
     {
-        positions: ['.truyen-list > .list-truyen-item-wrap'],
-        lookedType: 'a:nth-child(1)',
-        lookedAttr: 'href',
-        urls: ['https://ww5.mangakakalot.tv/manga_list/?type=topview&category=all&state=all&page=!!!']
+        positions: [".truyen-list > .list-truyen-item-wrap"],
+        lookedType: "a:nth-child(1)",
+        lookedAttr: "href",
+        urls: [
+            "https://ww5.mangakakalot.tv/manga_list/?type=topview&category=all&state=all&page=!!!",
+        ],
     },
-]
+];
 
-const fs = require('fs');
+const fs = require("fs");
 
 export class BTTScrapper {
-
     async getEntries(amount = undefined, saveEntries = true) {
         let entries: any = [];
         if (saveEntries) {
             await this.loadEntries()
                 .then((jsonData) => {
                     entries = jsonData;
-                    console.log('Entries loaded');
+                    console.log("Entries loaded");
                 })
                 .catch((err) => {
                     console.log(err);
-                })
+                });
         }
 
         if (entries.length <= 0) {
@@ -37,16 +38,22 @@ export class BTTScrapper {
                 let i = 1;
                 do {
                     let lastLength = entries.length;
-                    process.stdout.write(`\rGathering entries ${location.urls[0]}. Progress -> ${entries.length} entries`);
+                    process.stdout.write(
+                        `\rGathering entries ${location.urls[0]}. Progress -> ${entries.length} entries`
+                    );
                     let locateClone = JSON.parse(JSON.stringify(location));
-                    locateClone.urls = [getUrlWithToken(locateClone.urls[0], i)];
-                    let current = await AdvancedScrapper.gatherEntries(locateClone);
+                    locateClone.urls = [
+                        getUrlWithToken(locateClone.urls[0], i),
+                    ];
+                    let current = await AdvancedScrapper.gatherEntries(
+                        locateClone
+                    );
                     entries.push(...current);
                     pass = entries.length > lastLength;
                     i++;
                     if (amount && entries.length >= amount) break;
                 } while (pass);
-                console.log('');
+                console.log("");
             }
 
             if (amount) entries = entries.slice(0, amount);
@@ -59,13 +66,13 @@ export class BTTScrapper {
 
     saveEntries(data: string) {
         fs.writeFile("entries.json", data, () => {
-            console.log('Entries saved as entries.json');
+            console.log("Entries saved as entries.json");
         });
     }
 
     async loadEntries() {
         return new Promise((resolve, reject) => {
-            fs.readFile("entries.json", 'utf8', (err, data) => {
+            fs.readFile("entries.json", "utf8", (err, data) => {
                 if (err) {
                     reject(err);
                     return;
@@ -83,72 +90,89 @@ export class BTTScrapper {
 
     private giveEntriesProperHttp(entries: any[]) {
         entries.forEach((el, index) => {
-            entries[index] = `https://ww5.mangakakalot.tv/${encodeURIComponent(el.slice(1))}`;
-        })
+            entries[index] = `https://ww5.mangakakalot.tv/${encodeURIComponent(
+                el.slice(1)
+            )}`;
+        });
         return entries;
     }
 
     async getMangaData(entry: any) {
-        const data = await AdvancedScrapper.getMangaData({
-            name: {
-                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(1)'],
-                lookedType: 'h1',
-                lookedAttr: 'content',
-                urls: [entry],
-            },
-            pic: {
-                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > div'],
-                lookedType: 'img',
-                lookedAttr: 'src',
-                urls: [entry]
-            },
-            authors: {
-                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(2)'],
-                lookedType: 'a',
-                lookedAttr: 'content',
-                urls: [entry],
-            },
-            genres: {
-                positions: ['body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(7)'],
-                lookedType: 'a',
-                lookedAttr: 'content',
-                urls: [entry],
-            },
-            description: {
-                positions: ['body > div.container > div.main-wrapper > div.leftCol'],
-                lookedType: '#noidungm',
-                lookedAttr: 'content',
-                urls: [entry],
-            },
-            chapters: {
+        const data = await AdvancedScrapper.getMangaData(
+            {
                 name: {
-                    positions: ['#chapter > div > div.chapter-list > div.row > span'],
-                    lookedType: 'a',
-                    lookedAttr: 'content',
+                    positions: [
+                        "body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(1)",
+                    ],
+                    lookedType: "h1",
+                    lookedAttr: "content",
                     urls: [entry],
                 },
-                url: {
-                    positions: ['#chapter > div > div.chapter-list > div.row > span'],
-                    lookedType: 'a',
-                    lookedAttr: 'href',
+                pic: {
+                    positions: [
+                        "body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > div",
+                    ],
+                    lookedType: "img",
+                    lookedAttr: "src",
                     urls: [entry],
-                }
+                },
+                authors: {
+                    positions: [
+                        "body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(2)",
+                    ],
+                    lookedType: "a",
+                    lookedAttr: "content",
+                    urls: [entry],
+                },
+                genres: {
+                    positions: [
+                        "body > div.container > div.main-wrapper > div.leftCol > div.manga-info-top > ul > li:nth-child(7)",
+                    ],
+                    lookedType: "a",
+                    lookedAttr: "content",
+                    urls: [entry],
+                },
+                description: {
+                    positions: [
+                        "body > div.container > div.main-wrapper > div.leftCol",
+                    ],
+                    lookedType: "#noidungm",
+                    lookedAttr: "content",
+                    urls: [entry],
+                },
+                chapters: {
+                    name: {
+                        positions: [
+                            "#chapter > div > div.chapter-list > div.row > span",
+                        ],
+                        lookedType: "a",
+                        lookedAttr: "content",
+                        urls: [entry],
+                    },
+                    url: {
+                        positions: [
+                            "#chapter > div > div.chapter-list > div.row > span",
+                        ],
+                        lookedType: "a",
+                        lookedAttr: "href",
+                        urls: [entry],
+                    },
+                },
+                pages: {
+                    positions: ["#vungdoc"],
+                    lookedType: "img",
+                    lookedAttr: "data-src",
+                    urls: [entry],
+                },
             },
-            pages: {
-                positions: ['#vungdoc'],
-                lookedType: 'img',
-                lookedAttr: 'data-src',
-                urls: [entry],
-            }
-        },
-            'https://ww5.mangakakalot.tv'
-            );
+            "https://ww5.mangakakalot.tv"
+        );
         if (!data) return null;
-        data.description = data.description.trim().replace(/\n\s*/g, '');
-        data.pic = `https://ww5.mangakakalot.tv${data.pic}`
+        data.description = data.description.trim().replace(/\n\s*/g, "");
+        data.pic = `https://ww5.mangakakalot.tv${data.pic}`;
         data.chapters.forEach((chapter, i) => {
-            data.chapters[i].name = chapter.name.replace('\n', '').trim();
-        })
+            data.chapters[i].name = chapter.name.replace("\n", "").trim();
+        });
         if (data.chapters.length < 1) return null;
         return data;
     }
@@ -186,19 +210,21 @@ export class BTTScrapper {
     }
 
     async sendSpider(options: {
-        entryAmount?: number,
-        skipTo?: number,
-        saveEntries: boolean,
+        entryAmount?: number;
+        skipTo?: number;
+        saveEntries: boolean;
     }) {
         let entries: any[] = await this.getEntries(
             options.entryAmount ? options.entryAmount : undefined,
-            options.saveEntries);
+            options.saveEntries
+        );
         if (options.skipTo && entries.length > options.skipTo) {
             entries = entries.slice(
                 options.skipTo,
                 options.entryAmount
                     ? options.skipTo + options.entryAmount
-                    : entries.length);
+                    : entries.length
+            );
         }
         for (const entry of entries) {
             let data = await this.getMangaData(entry);
@@ -206,18 +232,28 @@ export class BTTScrapper {
                 let manga = await MangaTable.read({
                     where: [
                         {
-                            element: 'manga.original_name',
+                            element: "manga.original_name",
                             value: data.name,
-                        }
-                    ]
+                        },
+                    ],
                 });
-                this.sendMangaToDatabase(data, manga && manga[0] ? manga[0] : undefined).then(res => {
-                    if (!res) console.log(`Something went wrong during adding ${data.name} to database`);
-                    console.log(res.name + ' added to database. ' + res.chapters.length + ' chapter count');
+                this.sendMangaToDatabase(
+                    data,
+                    manga && manga[0] ? manga[0] : undefined
+                ).then((res) => {
+                    if (!res)
+                        console.log(
+                            `Something went wrong during adding ${data.name} to database`
+                        );
+                    console.log(
+                        res.name +
+                            " added to database. " +
+                            res.chapters.length +
+                            " chapter count"
+                    );
                 });
             }
         }
-        console.log('SPIDER WORK IS DONE. HE IS GOING TO SLEEP NOW.')
+        console.log("SPIDER WORK IS DONE. HE IS GOING TO SLEEP NOW.");
     }
-
 }
