@@ -18,8 +18,10 @@ import {
 import { AdvancedScrapper } from "./modules/scrapper/advanced-scrapper";
 import { ChapterType } from "./types/chapter.type";
 import { RepositoryFindOptions } from "./types/repository-find-options";
+import { ContactInfo } from "./modules/tables/contact-info";
+import * as express from "express";
+import { sendResponse } from "./helper/SendResponseHelper";
 
-const express = require("express");
 const cors = require("cors");
 require("@dotenvx/dotenvx").config();
 
@@ -35,92 +37,155 @@ AppDataSource.initialize()
         app.use(cors());
 
         // Use this for developement purposes. Do not push changes for it.
-        app.post("/test", (req: any, res: any) => {
-            res.send();
+        app.post("/test", (req: express.Request, res: express.Response) => {
+            sendResponse(res, 200);
         });
 
-        app.post("/post", (req: any, res: any) => {
+        app.post("/post", (req: express.Request, res: express.Response) => {
             let body = req.body;
             EmailHandler.sendMail(body, (info: { messageId: any }) => {
-                console.log(`E-mail has been sent. Id -> ${info.messageId}`);
-                res.send(info);
-            });
-        });
-
-        type ContactInfo = {
-            name: string;
-            email: string;
-            subject: string;
-            message: string;
-        };
-        app.post("/sendMailMangaDot", (req: any, res: any) => {
-            let info: ContactInfo = req.body.info;
-            const body = {
-                from: info.email,
-                to: "mangadot.contact@gmail.com",
-                subject: `Contact from Manga Dot - ${info.subject}`,
-                text: `Hi, my name is ${info.name}.\n\n\t${info.message}`,
-            };
-            EmailHandler.sendCustomMail(body, (info: { messageId: any }) => {
-                console.log(`E-mail has been sent. Id -> ${info.messageId}`);
-                res.send(info);
-            });
-        });
-
-        app.post("/testMangaForm", async (req: any, res: any) => {
-            // let manga: MangaType = req.body.manga || null;
-            // let testId = req.body.testId || null;
-            // if (testId) {
-            //     scrapper.continueTest(manga, testId)
-            //         .then((results: any) => {
-            //             res.send(results);
-            //         })
-            // } else {
-            //     scrapper.testMangaForm(manga)
-            //         .then((results: any) => {
-            //             res.send(results);
-            //         })
-            // }
-            res.send(false);
-        });
-
-        app.post("/testMangaChapter", async (req: any, res: any) => {
-            // let manga: MangaType = req.body.manga || null;
-            // let chapter = req.body.chapter || null;
-            // scrapper.testMangaChapter(manga, chapter)
-            //     .then((passed: any) => {
-            //         res.send(passed);
-            //     })
-            res.send(false);
-        });
-
-        app.post("/createManga", async (req: any, res: any) => {
-            let manga: Manga =
-                MangaTable.convertDataToTableEntry(req.body.manga) || null;
-            MangaTable.create(manga).then((results: any) => {
-                res.send({
-                    success: true,
+                const message = `E-mail has been sent`;
+                console.log(`${message}. Id -> ${info.messageId}`);
+                sendResponse(res, 200, {
+                    status: "success",
+                    message,
+                    data: info,
                 });
             });
         });
 
-        app.post("/removeManga", async (req: any, res: any) => {
-            let manga: MangaType = req.body.manga;
-            let tableEntry = MangaTable.convertDataToTableEntry(manga);
-            MangaTable.remove(tableEntry).then((mangaRemoved) => {
-                res.send({
-                    success: true,
-                });
-            });
-        });
+        app.post(
+            "/sendMailMangaDot",
+            (req: express.Request, res: express.Response) => {
+                let info: ContactInfo = req.body.info;
+                const body = {
+                    from: info.email,
+                    to: "mangadot.contact@gmail.com",
+                    subject: `Contact from Manga Dot - ${info.subject}`,
+                    text: `Hi, my name is ${info.name}.\n\n\t${info.message} \n\nPlease, contact me back ${info.email}`,
+                };
+                EmailHandler.sendCustomMail(
+                    body,
+                    (info: { messageId: any }) => {
+                        console.log(
+                            `E-mail has been sent. Id -> ${info.messageId}`
+                        );
+                        sendResponse(res, 200, {
+                            status: "success",
+                            message: `E-mail has been sent`,
+                            data: info,
+                        });
+                    }
+                );
+            }
+        );
 
-        app.post("/getMangaList", (req: any, res: any) => {
-            let options: RepositoryFindOptions | undefined = req.body
-                .options as RepositoryFindOptions;
+        app.post(
+            "/manga",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                try {
+                    const mangaData: MangaType = req.body.manga;
 
-            MangaTable.getMangaList(options).then(
-                async (data: { list: Manga[]; count: number }) => {
-                    let convertedList: MangaType[] = [];
+                    // Validate mangaData here (e.g., check for required fields)
+                    if (
+                        !mangaData ||
+                        !mangaData.name ||
+                        !mangaData.pic ||
+                        !mangaData.authors ||
+                        !mangaData.tags ||
+                        !mangaData.likes ||
+                        !mangaData.lastUpdateDate ||
+                        !mangaData.addedDate ||
+                        !mangaData.description ||
+                        !mangaData.chapterCount ||
+                        mangaData.viewCount
+                    ) {
+                        return sendResponse(res, 400, {
+                            status: "error",
+                            message: "Missing required fields",
+                        });
+                    }
+
+                    const manga: Manga =
+                        MangaTable.convertDataToTableEntry(mangaData);
+                    const results = await MangaTable.create(manga);
+
+                    return sendResponse(res, 200, {
+                        status: "success",
+                        data: results, // Assuming `results` contains the created manga details
+                    });
+                } catch (error) {
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message: "An error occurred while creating the manga",
+                    });
+                }
+            }
+        );
+
+        app.delete(
+            "/manga/:id",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                const mangaId = req.params.id;
+
+                try {
+                    // Validate the manga ID
+                    if (!mangaId) {
+                        return sendResponse(res, 400, {
+                            status: "error",
+                            message: "Manga ID is required",
+                        });
+                    }
+
+                    const manga = await MangaTable.read({
+                        where: [{ element: "manga.id", value: mangaId }],
+                    });
+                    const mangaRemoved = manga
+                        ? await MangaTable.remove(manga[0])
+                        : false;
+
+                    if (mangaRemoved) {
+                        return sendResponse(res, 200, {
+                            status: "success",
+                            message: "Manga removed successfully",
+                        });
+                    } else {
+                        return sendResponse(res, 404, {
+                            status: "error",
+                            message: "Manga not found",
+                        });
+                    }
+                } catch (error) {
+                    console.error(error);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message: "An error occurred while removing the manga",
+                    });
+                }
+            }
+        );
+
+        app.get(
+            "/manga",
+            async (req: express.Request, res: express.Response) => {
+                const options: RepositoryFindOptions | undefined = req.query
+                    .options
+                    ? (JSON.parse(
+                          req.query.options as string
+                      ) as RepositoryFindOptions)
+                    : undefined;
+
+                try {
+                    // Fetch the manga list based on options if no ID is provided
+                    const data = await MangaTable.getMangaList(options);
+                    const convertedList: MangaType[] = [];
+
                     for (const el of data.list) {
                         el.chapter_count = await ChapterTable.getChapterCount({
                             where: [{ element: "manga_id", value: el.id }],
@@ -129,105 +194,221 @@ AppDataSource.initialize()
                             MangaTable.convertTableEntryToData(el)
                         );
                     }
-                    res.send({ list: convertedList, count: data.count });
+
+                    return sendResponse(res, 200, {
+                        status: "success",
+                        data: {
+                            list: convertedList,
+                            count: data.count,
+                        },
+                    });
+                } catch (error) {
+                    console.error(error);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message:
+                            "An error occurred while fetching the manga data",
+                    });
                 }
-            );
-        });
-
-        app.post("/getMangaChapters", (req: any, res: any) => {
-            let mangaId: number = req.body.mangaId;
-            if (!mangaId) {
-                res.send([]);
             }
+        );
 
-            ChapterTable.read({
-                where: [{ element: "manga_id", value: mangaId }],
-            }).then((chapterList) => {
-                let convertedList: ChapterType[] = [];
-                chapterList.sort((a, b) => b.id - a.id);
-                chapterList.forEach((chapter) => {
-                    convertedList.push(
-                        ChapterTable.convertTableEntryToData(chapter)
-                    );
-                });
-                res.send(convertedList);
-            });
-        });
+        app.get(
+            "/manga/:id",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                const mangaId: number | undefined = req.params.id
+                    ? parseInt(req.params.id)
+                    : undefined;
 
-        app.post("/getMangaPages", async (req: any, res: any) => {
-            let mangaId: number = req.body.mangaId;
-            let chapterId: number = req.body.chapterId;
-            if (!mangaId || !chapterId) {
-                res.send([]);
-            }
+                try {
+                    const manga = await MangaTable.read({
+                        where: [{ element: "manga.id", value: mangaId }],
+                    });
 
-            PageTable.read({
-                where: {
-                    chapter_id: chapterId,
-                },
-            }).then((results: any) => {
-                res.send(results);
-                MangaTable.increaseViewCount(mangaId);
-            });
-        });
-
-        app.post("/likeManga", (req: any, res: any) => {
-            const likeData: LikeType = req.body.like;
-            if (!likeData || !likeData.mangaId || !likeData.userId) {
-                res.send({
-                    status: 0,
-                    message: "Didn't received required data to process action",
-                    data: null,
-                });
-            }
-
-            LikeTable.read({
-                where: {
-                    user_id: likeData.userId,
-                    manga_id: likeData.mangaId,
-                },
-            }).then((likes) => {
-                const like = likes[0];
-                if (like) {
-                    LikeTable.remove(like.id)
-                        .then((like) => {
-                            MangaTable.update(like.manga_id);
-                            res.send({
-                                status: 1,
-                                message: "Your dislike has been noticed",
-                                data: like,
-                            });
-                        })
-                        .catch((err) => {
-                            res.send({
-                                status: 0,
-                                message: err,
-                                data: null,
-                            });
+                    if (!manga || manga.length === 0) {
+                        return sendResponse(res, 404, {
+                            status: "error",
+                            message: "Manga not found",
                         });
-                } else {
-                    const like = LikeTable.convertDataToTableEntry(likeData);
-                    LikeTable.create(like)
-                        .then((like) => {
-                            MangaTable.update(like.manga_id);
-                            res.send({
-                                status: 1,
-                                message: "You like has been noticed",
-                                data: like,
-                            });
-                        })
-                        .catch((err) => {
-                            res.send({
-                                status: 0,
-                                message: err,
-                                data: null,
-                            });
+                    }
+
+                    const mangaEntry = manga[0];
+                    mangaEntry.chapter_count =
+                        await ChapterTable.getChapterCount({
+                            where: [
+                                { element: "manga_id", value: mangaEntry.id },
+                            ],
                         });
+
+                    const convertedManga =
+                        MangaTable.convertTableEntryToData(mangaEntry);
+
+                    return sendResponse(res, 200, {
+                        status: "success",
+                        data: {
+                            manga: convertedManga,
+                        },
+                    });
+                } catch (error) {
+                    console.error(error);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message:
+                            "An error occurred while fetching the manga data.",
+                    });
                 }
-            });
-        });
+            }
+        );
 
-        app.post("/register", (req: any, res: any) => {
+        app.get(
+            "/manga/:id/chapters",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                const mangaId: number = parseInt(req.params.id, 10);
+
+                try {
+                    if (isNaN(mangaId)) {
+                        return sendResponse(res, 400, {
+                            status: "error",
+                            message: "Invalid manga ID.",
+                        });
+                    }
+
+                    const chapterList = await ChapterTable.read({
+                        where: [{ element: "manga_id", value: mangaId }],
+                    });
+
+                    const convertedList: ChapterType[] = chapterList
+                        .sort((a, b) => b.id - a.id)
+                        .map((chapter) =>
+                            ChapterTable.convertTableEntryToData(chapter)
+                        );
+
+                    return sendResponse(res, 200, {
+                        status: "success",
+                        data: {
+                            chapters: convertedList,
+                        },
+                    });
+                } catch (error) {
+                    console.error(error);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message:
+                            "An error occurred while fetching manga chapters.",
+                    });
+                }
+            }
+        );
+
+        app.get(
+            "/manga/:mangaId/chapters/:chapterId/pages",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                const mangaId: number = parseInt(req.params.mangaId, 10);
+                const chapterId: number = parseInt(req.params.chapterId, 10);
+
+                try {
+                    if (isNaN(mangaId) || isNaN(chapterId)) {
+                        return sendResponse(res, 400, {
+                            status: "error",
+                            message: "Invalid manga ID or chapter ID.",
+                        });
+                    }
+
+                    const results = await PageTable.read({
+                        where: {
+                            chapter_id: chapterId,
+                        },
+                    });
+
+                    await MangaTable.increaseViewCount(mangaId);
+
+                    return sendResponse(res, 200, {
+                        status: "success",
+                        data: {
+                            pages: results,
+                        },
+                    });
+                } catch (error) {
+                    console.error(error);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message:
+                            "An error occurred while fetching manga pages.",
+                    });
+                }
+            }
+        );
+
+        app.post(
+            "/manga/like",
+            async (
+                req: express.Request,
+                res: express.Response
+            ): Promise<any> => {
+                const likeData: LikeType = req.body.like;
+
+                // Validate input
+                if (!likeData || !likeData.mangaId || !likeData.userId) {
+                    return sendResponse(res, 400, {
+                        status: "error",
+                        message:
+                            "Didn't receive required data to process action",
+                    });
+                }
+
+                try {
+                    // Check if the user already liked the manga
+                    const likes = await LikeTable.read({
+                        where: {
+                            user_id: likeData.userId,
+                            manga_id: likeData.mangaId,
+                        },
+                    });
+
+                    const existingLike = likes[0];
+
+                    if (existingLike) {
+                        // User is removing their like (dislike)
+                        await LikeTable.remove(existingLike.id);
+                        await MangaTable.update(existingLike.manga_id);
+                        return sendResponse(res, 200, {
+                            status: "success",
+                            message: "Your dislike has been noted",
+                            data: existingLike,
+                        });
+                    } else {
+                        // User is adding a like
+                        const like =
+                            LikeTable.convertDataToTableEntry(likeData);
+                        const createdLike = await LikeTable.create(like);
+                        await MangaTable.update(createdLike.manga_id);
+                        return sendResponse(res, 201, {
+                            status: "success",
+                            message: "Your like has been noted",
+                            data: createdLike,
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message:
+                            "An error occurred while processing your request.",
+                    });
+                }
+            }
+        );
+
+        app.post("/register", (req: express.Request, res: express.Response) => {
             const userData: UserType = req.body.user;
             const activateUrl: string = req.body.activateUrl;
             if (
@@ -236,12 +417,10 @@ AppDataSource.initialize()
                 !userData.name ||
                 !userData.password
             ) {
-                res.send({
-                    status: 0,
-                    message: "Invalid user form sent",
-                    data: null,
+                return sendResponse(res, 400, {
+                    status: "error",
+                    message: "Invalid user form",
                 });
-                return;
             }
             UserTable.read({
                 where: {
@@ -250,18 +429,18 @@ AppDataSource.initialize()
                 take: 1,
             }).then(async (user) => {
                 if (user[0]) {
-                    res.send({
-                        status: 0,
+                    return sendResponse(res, 409, {
+                        status: "error",
                         message: "User with this email address already exist",
-                        data: null,
                     });
-                    return;
                 }
+
                 userData.password = await AccountHandler.hashPassword(
                     userData.password
                 ).then((hash) => {
                     return hash;
                 });
+
                 UserTable.create(
                     UserTable.convertDataToTableEntry(
                         userData,
@@ -269,11 +448,10 @@ AppDataSource.initialize()
                     )
                 )
                     .then((registerRes) => {
-                        res.send({
-                            status: 1,
+                        sendResponse(res, 201, {
+                            status: "success",
                             message:
                                 "User created. Check Your email to activate your account. (Remember to check spam as well)",
-                            data: registerRes,
                         });
                         AccountHandler.sendConfirmationEmail(
                             activateUrl,
@@ -282,87 +460,78 @@ AppDataSource.initialize()
                         return;
                     })
                     .catch((registerErr) => {
-                        res.send({
-                            status: 0,
-                            message: registerErr,
-                            data: null,
+                        return sendResponse(res, 500, {
+                            status: "error",
+                            message: registerErr.message,
                         });
-                        return;
                     });
             });
         });
 
-        app.post("/resendActivation", (req: any, res: any) => {
-            const email = req.body.email;
-            const activateUrl: string = req.body.activateUrl;
-            if (!email || !activateUrl) {
-                res.send({
-                    status: 0,
-                    message: "Invalid data. Issue reported to administration",
-                    data: null,
-                });
-                return;
-            }
-            UserTable.read({
-                where: {
-                    email: email,
-                },
-            })
-                .then((users) => {
-                    let user = users[0];
-                    if (!user) {
-                        res.send({
-                            status: 0,
-                            message: "There is no user with this email",
-                            data: null,
-                        });
-                        return;
-                    }
-                    if (!user.verificationCode) {
-                        res.send({
-                            status: 0,
-                            message:
-                                "User already verified. You can log in now",
-                            data: null,
-                        });
-                        return;
-                    }
-                    AccountHandler.sendConfirmationEmail(
-                        activateUrl,
-                        user,
-                        () => {
-                            res.send({
-                                status: 1,
-                                message:
-                                    "Activation link has been sent to your email address",
-                                data: null,
-                            });
-                            return;
-                        }
-                    );
-                })
-                .catch((err) => {
-                    res.send({
-                        status: 0,
-                        message: err,
-                        data: null,
+        app.post(
+            "/resendActivation",
+            (req: express.Request, res: express.Response) => {
+                const email = req.body.email;
+                const activateUrl: string = req.body.activateUrl;
+                if (!email || !activateUrl) {
+                    return sendResponse(res, 400, {
+                        status: "error",
+                        message: "Missing form data",
                     });
-                    return;
-                });
-        });
+                }
+                UserTable.read({
+                    where: {
+                        email: email,
+                    },
+                })
+                    .then((users) => {
+                        let user = users[0];
+                        if (!user) {
+                            return sendResponse(res, 404, {
+                                status: "error",
+                                message: "User not found",
+                            });
+                        }
+                        if (!user.verificationCode) {
+                            return sendResponse(res, 500, {
+                                status: "success",
+                                message:
+                                    "User already verified. You can log in now",
+                            });
+                        }
+                        AccountHandler.sendConfirmationEmail(
+                            activateUrl,
+                            user,
+                            () => {
+                                return sendResponse(res, 200, {
+                                    status: "success",
+                                    message:
+                                        "Activation link has been sent to your email address",
+                                });
+                            }
+                        );
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        return sendResponse(res, 500, {
+                            status: "error",
+                            message:
+                                "Failed to send activation link. Please try again later",
+                        });
+                    });
+            }
+        );
 
-        app.post("/login", (req: any, res: any) => {
+        app.post("/login", (req: express.Request, res: express.Response) => {
             const userData = {
                 email: req.body.email,
                 password: req.body.password,
             };
             if (!userData || !userData.email || !userData.password) {
-                res.send({
-                    status: 0,
+                return sendResponse(res, 400, {
+                    status: "error",
                     message: "Invalid credentials",
-                    data: null,
                 });
-                return;
             }
             UserTable.read({
                 where: {
@@ -373,13 +542,12 @@ AppDataSource.initialize()
             })
                 .then((loginUser) => {
                     if (!loginUser[0]) {
-                        res.send({
-                            status: 0,
+                        return sendResponse(res, 400, {
+                            status: "error",
                             message: "Invalid credentials",
-                            data: null,
                         });
-                        return;
                     }
+
                     AccountHandler.comparePassword(
                         userData.password,
                         loginUser[0].password
@@ -387,83 +555,76 @@ AppDataSource.initialize()
                         if (isPasswordValid) {
                             loginUser[0].authToken = getRandomString();
                             UserTable.update(loginUser[0]);
-                            res.send({
-                                status: 1,
+                            return sendResponse(res, 200, {
+                                status: "success",
                                 message: "Successfully logged in",
                                 data: loginUser[0],
                             });
-                            return;
                         } else {
-                            res.send({
-                                status: 0,
+                            return sendResponse(res, 400, {
+                                status: "error",
                                 message: "Invalid password",
-                                data: null,
                             });
-                            return;
                         }
                     });
                 })
                 .catch((loginErr) => {
-                    res.send({
-                        status: 0,
-                        message: loginErr,
-                        data: null,
+                    console.log(loginErr);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message: "Something went wrong. Try again later.",
                     });
-                    return;
                 });
         });
 
-        app.post("/login/token", (req: any, res: any) => {
-            const token = req.body.token;
-            if (!token) {
-                res.send({
-                    status: 0,
-                    message: "Auth token not found",
-                    data: null,
-                });
-                return;
-            }
-            UserTable.read({
-                where: {
-                    authToken: token,
-                    verificationCode: null,
-                },
-                take: 1,
-            })
-                .then((loginUser) => {
-                    if (!loginUser[0]) {
-                        res.send({
-                            status: 0,
-                            message: "Auth code expired",
-                            data: null,
-                        });
-                        return;
-                    }
-                    res.send({
-                        status: 1,
-                        message: "Successfully logged in",
-                        data: loginUser[0],
+        app.post(
+            "/login/token",
+            (req: express.Request, res: express.Response) => {
+                const token = req.body.token;
+                if (!token) {
+                    return sendResponse(res, 404, {
+                        status: "error",
+                        message: "Auth token not found",
                     });
+                }
+                UserTable.read({
+                    where: {
+                        authToken: token,
+                        verificationCode: null,
+                    },
+                    take: 1,
                 })
-                .catch((loginErr) => {
-                    res.send({
-                        status: 0,
-                        message: loginErr,
-                        data: null,
-                    });
-                    return;
-                });
-        });
+                    .then((loginUser) => {
+                        if (!loginUser[0]) {
+                            return sendResponse(res, 400, {
+                                status: "error",
+                                message: "Auth code expired",
+                            });
+                        }
 
-        app.post("/logout", (req: any, res: any) => {
+                        return sendResponse(res, 200, {
+                            status: "success",
+                            message: "Successfully logged in",
+                            data: loginUser[0],
+                        });
+                    })
+                    .catch((loginErr) => {
+                        console.log(loginErr);
+                        return sendResponse(res, 500, {
+                            status: "error",
+                            message: "Something went wrong. Try again later.",
+                        });
+                    });
+            }
+        );
+
+        app.post("/logout", (req: express.Request, res: express.Response) => {
             const id = req.body.id;
             if (!id) {
-                res.send({
-                    status: 0,
+                return sendResponse(res, 400, {
+                    status: "error",
                     message: "Id was not found in request",
-                    data: null,
                 });
-                return;
             }
             UserTable.read({
                 where: {
@@ -472,168 +633,166 @@ AppDataSource.initialize()
             })
                 .then((users) => {
                     if (!users[0]) {
-                        res.send({
-                            status: 0,
-                            message: "There is no account with given id",
-                            data: null,
+                        return sendResponse(res, 404, {
+                            status: "error",
+                            message: "Account not found",
                         });
-                        return;
                     }
                     let user = users[0];
                     user.authToken = null;
                     UserTable.update(user);
-                    res.send({
-                        status: 1,
+                    return sendResponse(res, 200, {
+                        status: "success",
                         message: "Successfully logged out",
-                        data: true,
                     });
-                    return;
                 })
                 .catch((err) => {
-                    res.send({
-                        status: 0,
-                        message: err,
-                        data: null,
+                    console.log(err);
+                    return sendResponse(res, 500, {
+                        status: "error",
+                        message: "Something went wrong. Try again later.",
                     });
-                    return;
                 });
         });
 
-        app.post("/activate", (req: any, res: any) => {
+        app.post("/activate", (req: express.Request, res: express.Response) => {
             const code = req.body.code;
             if (!code) {
-                res.send({
-                    status: 0,
-                    message: "Code was not found in request",
-                    data: null,
+                return sendResponse(res, 400, {
+                    status: "error",
+                    message: "Code not found in request",
                 });
-                return;
             }
+
             UserTable.read({
                 where: {
                     verificationCode: code,
                 },
             }).then((users) => {
                 if (!users[0]) {
-                    res.send({
-                        status: 0,
-                        message: "This verification code expired",
+                    return sendResponse(res, 400, {
+                        status: "error",
+                        message: "Verification code expired",
                     });
-                    return;
                 }
+
                 const updatedUser = users[0];
                 updatedUser.verificationCode = null;
                 UserTable.update(updatedUser)
                     .then((verifiedUser) => {
                         if (!verifiedUser) {
-                            res.send({
-                                status: 0,
+                            return sendResponse(res, 500, {
+                                status: "error",
                                 message:
                                     "Something went wrong during user verification. Try again later.",
                             });
-                            return;
                         }
-                        res.send({
-                            status: 1,
+
+                        return sendResponse(res, 201, {
+                            status: "success",
                             message:
                                 "Account verified successfully. You can now log in!",
                         });
-                        return;
                     })
                     .catch((verifiedErr) => {
-                        res.send({
-                            status: 0,
-                            message: verifiedErr,
-                        });
-                        return;
-                    });
-            });
-        });
-
-        app.post("/forgotPassword", async (req: any, res: any) => {
-            const email = req.body.email;
-            const newPassword = req.body.newPassword;
-            if (!email || !newPassword) {
-                res.send({
-                    status: 0,
-                    message: "Data was not found in request",
-                    data: null,
-                });
-                return;
-            }
-            UserTable.read({
-                where: {
-                    email: email,
-                    verificationCode: null,
-                },
-            }).then(async (users) => {
-                let user = users[0];
-                if (!user) {
-                    res.send({
-                        status: 0,
-                        message: "There is no user with this email address",
-                        data: null,
-                    });
-                    return;
-                }
-                let generatedToken = AccountHandler.getRandomString();
-                sendPasswordResetEmail(
-                    `${req.protocol}://${req.get("host")}/resetPassword`,
-                    generatedToken,
-                    user,
-                    () => {
-                        AccountHandler.forgotPasswordWaitingList.push({
-                            user: user,
-                            newPassword: newPassword,
-                            token: generatedToken,
-                        });
-                        res.send({
-                            status: 1,
+                        console.log(verifiedErr);
+                        return sendResponse(res, 500, {
+                            status: "error",
                             message:
-                                "Verification mail has been sent to your account",
-                            data: null,
+                                "Something went wrong during user verification. Try again later.",
                         });
-                        return;
-                    }
-                );
+                    });
             });
         });
 
-        app.get("/resetPassword", async (req: any, res: any) => {
-            const token = req.query.token;
-            if (!token) {
-                res.send("<d1>Token invalid</d1>");
-                return;
-            }
-            let changeRequestIndex = AccountHandler.forgotListIndexOfReq(token);
-            if (changeRequestIndex === null) {
-                res.send("<d1>Token not found</d1>");
-                return;
-            }
-            let changeRequest =
-                AccountHandler.forgotPasswordWaitingList[changeRequestIndex];
-            changeRequest.newPassword = await AccountHandler.hashPassword(
-                changeRequest.newPassword
-            ).then((hash) => {
-                return hash;
-            });
-            changeRequest.user.password = changeRequest.newPassword;
-            changeRequest.user.authToken = null;
-            UserTable.update(changeRequest.user).then((userUpdateRes) => {
-                if (!userUpdateRes) {
-                    res.send(
-                        "<d1>Something went wrong during changing your account password</d1>"
-                    );
-                    return;
-                } else {
-                    res.send("<d1>Your password has been changed</d1>");
+        app.post(
+            "/forgotPassword",
+            async (req: express.Request, res: express.Response) => {
+                const email = req.body.email;
+                const newPassword = req.body.newPassword;
+                if (!email || !newPassword) {
+                    return sendResponse(res, 400, {
+                        status: "error",
+                        message: "Missing email and new password.",
+                    });
                 }
-                AccountHandler.forgotPasswordWaitingList.splice(
-                    changeRequestIndex,
-                    1
-                );
-            });
-        });
+
+                UserTable.read({
+                    where: {
+                        email: email,
+                        verificationCode: null,
+                    },
+                }).then(async (users) => {
+                    let user = users[0];
+                    if (!user) {
+                        return sendResponse(res, 404, {
+                            status: "error",
+                            message: "There is no user with this email address",
+                        });
+                    }
+                    let generatedToken = AccountHandler.getRandomString();
+                    sendPasswordResetEmail(
+                        `${req.protocol}://${req.get("host")}/resetPassword`,
+                        generatedToken,
+                        user,
+                        () => {
+                            AccountHandler.forgotPasswordWaitingList.push({
+                                user: user,
+                                newPassword: newPassword,
+                                token: generatedToken,
+                            });
+                            return sendResponse(res, 200, {
+                                status: "success",
+                                message:
+                                    "Verification mail has been sent to your account",
+                            });
+                        }
+                    );
+                });
+            }
+        );
+
+        app.get(
+            "/resetPassword",
+            async (req: express.Request, res: express.Response) => {
+                const token = req.query.token as string;
+                if (!token) {
+                    res.send("<d1>Token invalid</d1>");
+                    return;
+                }
+                let changeRequestIndex =
+                    AccountHandler.forgotListIndexOfReq(token);
+                if (changeRequestIndex === null) {
+                    res.send("<d1>Token not found</d1>");
+                    return;
+                }
+                let changeRequest =
+                    AccountHandler.forgotPasswordWaitingList[
+                        changeRequestIndex
+                    ];
+                changeRequest.newPassword = await AccountHandler.hashPassword(
+                    changeRequest.newPassword
+                ).then((hash) => {
+                    return hash;
+                });
+                changeRequest.user.password = changeRequest.newPassword;
+                changeRequest.user.authToken = null;
+                UserTable.update(changeRequest.user).then((userUpdateRes) => {
+                    if (!userUpdateRes) {
+                        res.send(
+                            "<d1>Something went wrong during changing your account password</d1>"
+                        );
+                        return;
+                    } else {
+                        res.send("<d1>Your password has been changed</d1>");
+                    }
+                    AccountHandler.forgotPasswordWaitingList.splice(
+                        changeRequestIndex,
+                        1
+                    );
+                });
+            }
+        );
 
         AdvancedScrapper.axiosSetup();
 
