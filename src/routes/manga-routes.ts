@@ -9,14 +9,27 @@ import * as LikeTable from "../modules/tables/like-table";
 import { LikeType } from "../types/like.type";
 import { ChapterType } from "../types/chapter.type";
 import { RepositoryFindOptions } from "../types/repository-find-options";
+import { UserTokenData } from "../types/user-token-data.type";
+import { verifyToken } from "../modules/token-validation";
 
 const router = express.Router();
 
 router.post(
     "/manga",
+    verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData: MangaType = req.body.manga;
+            const userData: UserTokenData = req["tokenData"]
+                ? req["tokenData"]
+                : undefined;
+
+            if (userData === undefined || userData.accountType !== "admin") {
+                return sendResponse(res, 403, {
+                    status: "error",
+                    message: "You are not authorized to do this action!",
+                });
+            }
 
             // Validate mangaData here (e.g., check for required fields)
             if (
@@ -56,11 +69,20 @@ router.post(
 
 router.delete(
     "/manga/:id",
+    verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         const mangaId = req.params.id;
-
+        const userData: UserTokenData = req["tokenData"]
+            ? req["tokenData"]
+            : undefined;
         try {
-            // Validate the manga ID
+            if (userData === undefined || userData.accountType !== "admin") {
+                return sendResponse(res, 403, {
+                    status: "error",
+                    message: "You are not authorized to do this action!",
+                });
+            }
+
             if (!mangaId) {
                 return sendResponse(res, 400, {
                     status: "error",
@@ -188,6 +210,13 @@ router.get(
             const chapterList = await ChapterTable.read({
                 where: [{ element: "manga_id", value: mangaId }],
             });
+
+            if (chapterList.length === 0) {
+                return sendResponse(res, 404, {
+                    status: "error",
+                    message: "Didn't found any chapters for this manga",
+                });
+            }
 
             const convertedList: ChapterType[] = chapterList
                 .sort((a, b) => b.id - a.id)

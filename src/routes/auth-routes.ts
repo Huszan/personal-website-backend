@@ -3,10 +3,9 @@ import { sendResponse } from "../helper/SendResponseHelper";
 import * as UserTable from "../modules/tables/user-table";
 import * as AccountHandler from "../modules/account-handler";
 import { UserType } from "../types/user.type";
-import {
-    getRandomString,
-    sendPasswordResetEmail,
-} from "../modules/account-handler";
+import { sendPasswordResetEmail } from "../modules/account-handler";
+import { generateToken } from "../modules/token-validation";
+import { UserTokenData } from "../types/user-token-data.type";
 
 const router = express.Router();
 
@@ -142,7 +141,10 @@ router.post("/login", (req: express.Request, res: express.Response) => {
                 loginUser[0].password
             ).then((isPasswordValid) => {
                 if (isPasswordValid) {
-                    loginUser[0].authToken = getRandomString();
+                    loginUser[0].authToken = generateToken({
+                        id: loginUser[0].id,
+                        accountType: loginUser[0].accountType,
+                    } as UserTokenData);
                     UserTable.update(loginUser[0]);
                     return sendResponse(res, 200, {
                         status: "success",
