@@ -4,7 +4,7 @@
     "description": "",
     "type": "commonjs",
     "scripts": {
-        "start": "dotenvx run --env-file=.env -- nodemon",
+        "start": "dotenvx run --env-file=.env -- ts-node src/index.ts",
         "serve": "dotenvx run --env-file=.env.local -- nodemon",
         "typeorm": "typeorm-ts-node-commonjs"
     },
