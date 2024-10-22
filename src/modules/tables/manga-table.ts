@@ -2,10 +2,7 @@ import { AppDataSource } from "../../data-source";
 import { Manga } from "../../entity/Manga";
 import { MangaType } from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
-import * as ChapterTable from "../tables/chapter-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
-import { In, Like, QueryBuilder, SelectQueryBuilder } from "typeorm";
-import { query } from "express";
 import { TableManager } from "./table-manager";
 
 const repository = AppDataSource.manager.getRepository(Manga);

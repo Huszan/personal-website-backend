@@ -1,5 +1,4 @@
 import { AppDataSource } from "../../data-source";
-import { FindManyOptions, Like } from "typeorm";
 import { Chapter } from "../../entity/Chapter";
 import * as PageTable from "./page-table";
 import { ChapterType } from "../../types/chapter.type";

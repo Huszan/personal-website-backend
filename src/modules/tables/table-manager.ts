@@ -35,7 +35,9 @@ export class TableManager {
                     }
                 }
             } else {
-                query.andWhere(`${option.element} = ${option.value}`);
+                query.andWhere(`${option.element} = :val`, {
+                    val: option.value,
+                });
             }
         }
         return query;

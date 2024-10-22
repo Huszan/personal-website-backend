@@ -6,6 +6,7 @@ import { Like } from "./entity/Like";
 import { User } from "./entity/User";
 import { Chapter } from "./entity/Chapter";
 import { Page } from "./entity/Page";
+import { Cache } from "./entity/Cache";
 
 const dataSource = new DataSource({
     type: "mysql",
@@ -16,7 +17,7 @@ const dataSource = new DataSource({
     database: process.env.DS_DATABASE,
     synchronize: true,
     logging: false,
-    entities: [HtmlLocate, Manga, Like, User, Chapter, Page],
+    entities: [HtmlLocate, Manga, Like, User, Chapter, Page, Cache],
     migrations: [],
     subscribers: [],
 });

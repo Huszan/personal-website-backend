@@ -11,6 +11,7 @@ import { ChapterType } from "../types/chapter.type";
 import { RepositoryFindOptions } from "../types/repository-find-options";
 import { UserTokenData } from "../types/user-token-data.type";
 import { verifyToken } from "../modules/token-validation";
+import { getCache, setCache } from "../helper/cache.helper";
 
 const router = express.Router();
 
@@ -124,6 +125,15 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
         : undefined;
 
     try {
+        const cacheKey = `manga_${JSON.stringify(req.query.options)}`;
+        const cachedData = await getCache(cacheKey);
+        if (cachedData) {
+            return sendResponse(res, 200, {
+                status: "success",
+                data: JSON.parse(cachedData),
+            });
+        }
+
         // Fetch the manga list based on options if no ID is provided
         const data = await MangaTable.getMangaList(options);
         const convertedList: MangaType[] = [];
@@ -135,6 +145,13 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
             convertedList.push(MangaTable.convertTableEntryToData(el));
         }
 
+        await setCache(
+            cacheKey,
+            JSON.stringify({
+                list: convertedList,
+                count: data.count,
+            })
+        );
         return sendResponse(res, 200, {
             status: "success",
             data: {
