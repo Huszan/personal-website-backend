@@ -151,8 +151,6 @@ router.get(
                     .where({ user_id: userId })
                     .getMany();
 
-                console.log(progressList);
-
                 if (progressList === undefined || progressList.length === 0) {
                     return sendResponse(res, 404, {
                         status: "error",
