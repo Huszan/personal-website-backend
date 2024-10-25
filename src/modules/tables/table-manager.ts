@@ -35,9 +35,14 @@ export class TableManager {
                     }
                 }
             } else {
-                query.andWhere(`${option.element} = :val`, {
-                    val: option.value,
-                });
+                query.andWhere(
+                    `${option.element} ${
+                        Array.isArray(option.value) ? "IN" : "="
+                    } :val`,
+                    {
+                        val: option.value,
+                    }
+                );
             }
         }
         return query;

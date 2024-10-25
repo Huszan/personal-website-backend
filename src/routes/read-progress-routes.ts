@@ -125,9 +125,12 @@ router.get(
 
         try {
             if (!Number.isNaN(progressId)) {
-                const progress = await repo.findOne({
-                    where: { id: progressId },
-                });
+                let progress = await repo
+                    .createQueryBuilder("read_progress")
+                    .leftJoinAndSelect("read_progress.manga", "manga")
+                    .where({ id: progressId })
+                    .getOne();
+
                 if (progress === undefined) {
                     return sendResponse(res, 404, {
                         status: "error",
@@ -141,9 +144,15 @@ router.get(
                     data: convertTableEntryToData(progress),
                 });
             } else {
-                const progressList = await repo.find({
-                    where: { user: Equal(userId) },
-                });
+                const progressList = await repo
+                    .createQueryBuilder("read_progress")
+                    .leftJoinAndSelect("read_progress.manga", "manga")
+                    .leftJoinAndSelect("manga.likes", "likes")
+                    .where({ user_id: userId })
+                    .getMany();
+
+                console.log(progressList);
+
                 if (progressList === undefined || progressList.length === 0) {
                     return sendResponse(res, 404, {
                         status: "error",
@@ -158,6 +167,7 @@ router.get(
                 });
             }
         } catch (error) {
+            console.warn(error);
             return sendResponse(res, 500, {
                 status: "error",
                 message: "Internal server error while retrieving progress",

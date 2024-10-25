@@ -1,6 +1,7 @@
 import { AppDataSource } from "../../data-source";
 import { ReadProgress } from "../../entity/ReadProgress";
 import { ReadProgressType } from "../../types/read-progress.type";
+import * as mangaTable from "./manga-table";
 
 export const repository = AppDataSource.manager.getRepository(ReadProgress);
 
@@ -19,6 +20,7 @@ export function convertTableEntryToData(entry: ReadProgress): ReadProgressType {
         id: entry.id,
         userId: entry.user_id,
         mangaId: entry.manga_id,
+        manga: mangaTable.convertTableEntryToData(entry.manga),
         lastReadChapter: entry.last_read_chapter,
         lastReadPage: entry.last_read_page,
     };
