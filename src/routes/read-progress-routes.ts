@@ -149,6 +149,7 @@ router.get(
                     .leftJoinAndSelect("read_progress.manga", "manga")
                     .leftJoinAndSelect("manga.likes", "likes")
                     .where({ user_id: userId })
+                    .orderBy("read_progress.last_update_date", "DESC")
                     .getMany();
 
                 if (progressList === undefined || progressList.length === 0) {

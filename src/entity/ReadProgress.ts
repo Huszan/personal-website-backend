@@ -4,6 +4,7 @@ import {
     JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from "typeorm";
 import { User } from "./User";
 import { Manga } from "./Manga";
@@ -32,4 +33,7 @@ export class ReadProgress {
 
     @Column({ default: 0 })
     last_read_page: number;
+
+    @UpdateDateColumn({ type: "datetime", nullable: true })
+    last_update_date: Date;
 }

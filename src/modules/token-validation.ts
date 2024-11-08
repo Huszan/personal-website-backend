@@ -8,7 +8,7 @@ export const generateToken = <T extends object | string>(data: T) => {
 
     const payload = data;
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "7d", // TODO: fix this! It should be short and reapplied
     });
     return token;
 };
