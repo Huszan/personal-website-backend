@@ -28,11 +28,5 @@ AppDataSource.initialize()
         router.applyRoutes(app);
 
         AdvancedScrapper.axiosSetup();
-
-        // let bttScrapper = new BTTScrapper();
-        // bttScrapper.sendSpider({
-        //     saveEntries: true,
-        //     skipTo: 15031,
-        // });
     })
     .catch((error) => console.log(error));
