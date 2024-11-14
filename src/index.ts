@@ -22,7 +22,7 @@ AppDataSource.initialize()
                 `The server started on port ${listener.address()!.port}`
             );
         });
-        app.use(bodyParser.json());
+        app.use(bodyParser.json({ limit: "100mb" }));
         app.use(cors());
         app.use(limiter);
         router.applyRoutes(app);

@@ -2,6 +2,7 @@ import { AppDataSource } from "../../data-source";
 import { Manga } from "../../entity/Manga";
 import { MangaType } from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
+import * as ChapterTable from "../tables/chapter-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
 
@@ -116,9 +117,14 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     let entry = new Manga();
     if (data.id) entry.id = data.id;
     entry.name = data.name;
+    entry.original_name = data.name;
     entry.pic = data.pic;
     if (data.authors) entry.authors = data.authors;
     if (data.tags) entry.tags = data.tags;
+    if (data.chapters)
+        entry.chapters = data.chapters.map((chapter) =>
+            ChapterTable.convertDataToTableEntry(chapter)
+        );
     entry.last_update_date = data.lastUpdateDate;
     entry.added_date = data.addedDate;
     entry.view_count = data.viewCount;

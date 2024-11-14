@@ -68,10 +68,11 @@ export class AdvancedScrapper {
                     this.gatherEntries(localisation.chapters.name),
                     this.gatherEntries(localisation.chapters.url),
                 ]);
+
                 await Promise.all(
                     chapterNames.map(async (chapterName, i) => {
                         process.stdout.write(
-                            `\rProcessing ${i}/${chapterNames.length}\r`
+                            `\rProcessing ${i + 1}/${chapterNames.length}\r`
                         );
                         let pagesLocate = JSON.parse(
                             JSON.stringify(localisation.pages)
@@ -80,6 +81,8 @@ export class AdvancedScrapper {
                             pagesLocate.urls = [
                                 `${beforeUrl}${chapterLinks[i]}`,
                             ];
+                        } else {
+                            pagesLocate.urls = [chapterLinks[i]];
                         }
                         let pages: PageType[] = [];
                         let pageEntries = await this.gatherEntries(pagesLocate);
@@ -98,6 +101,7 @@ export class AdvancedScrapper {
                     })
                 );
             }
+
             if (chapters.length === 0) {
                 return null;
             }
