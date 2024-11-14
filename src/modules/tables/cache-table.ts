@@ -35,6 +35,12 @@ export async function remove(id: number) {
         return repository.remove(entry);
     }
 }
+export async function clearAllEntries() {
+    const entries = await repository.find();
+    if (entries.length > 0) {
+        return repository.remove(entries);
+    }
+}
 
 export function convertDataToTableEntry(data: CacheType): Cache {
     let entry = new Cache();

@@ -6,6 +6,7 @@ import * as MangaTable from "../modules/tables/manga-table";
 import * as ChapterTable from "../modules/tables/chapter-table";
 import * as PageTable from "../modules/tables/page-table";
 import * as LikeTable from "../modules/tables/like-table";
+import * as CascheTable from "../modules/tables/cache-table";
 import { LikeType } from "../types/like.type";
 import { ChapterType } from "../types/chapter.type";
 import { RepositoryFindOptions } from "../types/repository-find-options";
@@ -54,6 +55,7 @@ router.post(
 
             const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
             const results = await MangaTable.create(manga);
+            CascheTable.clearAllEntries();
 
             return sendResponse(res, 200, {
                 status: "success",
@@ -99,6 +101,7 @@ router.delete(
                 : false;
 
             if (mangaRemoved) {
+                CascheTable.clearAllEntries();
                 return sendResponse(res, 200, {
                     status: "success",
                     message: "Manga removed successfully",
