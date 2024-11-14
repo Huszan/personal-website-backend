@@ -22,6 +22,7 @@ AppDataSource.initialize()
                 `The server started on port ${listener.address()!.port}`
             );
         });
+        app.set("trust proxy", 1);
         app.use(bodyParser.json({ limit: "100mb" }));
         app.use(cors());
         app.use(limiter);
