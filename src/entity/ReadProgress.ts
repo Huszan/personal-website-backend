@@ -14,14 +14,14 @@ export class ReadProgress {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, { onDelete: "CASCADE" })
     @JoinColumn({ name: "user_id", referencedColumnName: "id" })
     user: User;
 
     @Column()
     user_id: number;
 
-    @ManyToOne(() => Manga)
+    @ManyToOne(() => Manga, { onDelete: "CASCADE" })
     @JoinColumn({ name: "manga_id", referencedColumnName: "id" })
     manga: Manga;
 

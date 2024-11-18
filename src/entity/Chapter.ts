@@ -26,7 +26,6 @@ export class Chapter {
         cascade: true,
         onDelete: "CASCADE",
     })
-    @JoinColumn()
     pages: Page[];
 
     @ManyToOne(() => Manga, { onDelete: "CASCADE" })

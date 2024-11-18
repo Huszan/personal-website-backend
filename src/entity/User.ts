@@ -6,6 +6,7 @@ import {
     JoinColumn,
 } from "typeorm";
 import { Like } from "./Like";
+import { ReadProgress } from "./ReadProgress";
 
 @Entity()
 export class User {
@@ -38,6 +39,15 @@ export class User {
     })
     authToken: string;
 
-    @OneToMany(() => Like, (like) => like.user)
+    @OneToMany(() => Like, (like) => like.user, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
     likes: Like[];
+
+    @OneToMany(() => ReadProgress, (progress) => progress.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
+    readProgress: ReadProgress[];
 }
