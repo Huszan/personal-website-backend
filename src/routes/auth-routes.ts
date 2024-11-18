@@ -6,6 +6,11 @@ import { UserType } from "../types/user.type";
 import { sendPasswordResetEmail } from "../modules/account-handler";
 import { generateToken } from "../modules/token-validation";
 import { UserTokenData } from "../types/user-token-data.type";
+import {
+    AuthLogoutConfig,
+    defAuthLogoutConfig,
+} from "../types/auth-logout-config.type";
+import { merge } from "../helper/basic.helper";
 
 const router = express.Router();
 
@@ -141,11 +146,13 @@ router.post("/login", (req: express.Request, res: express.Response) => {
                 loginUser[0].password
             ).then((isPasswordValid) => {
                 if (isPasswordValid) {
-                    loginUser[0].authToken = generateToken({
-                        id: loginUser[0].id,
-                        accountType: loginUser[0].accountType,
-                    } as UserTokenData);
-                    UserTable.update(loginUser[0]);
+                    if (!loginUser[0].authToken) {
+                        loginUser[0].authToken = generateToken({
+                            id: loginUser[0].id,
+                            accountType: loginUser[0].accountType,
+                        } as UserTokenData);
+                        UserTable.update(loginUser[0]);
+                    }
                     return sendResponse(res, 200, {
                         status: "success",
                         message: "Successfully logged in",
@@ -208,6 +215,10 @@ router.post("/login/token", (req: express.Request, res: express.Response) => {
 
 router.post("/logout", (req: express.Request, res: express.Response) => {
     const id = req.body.id;
+    const config = merge(
+        defAuthLogoutConfig,
+        req.body.config
+    ) as AuthLogoutConfig;
     if (!id) {
         return sendResponse(res, 400, {
             status: "error",
@@ -226,9 +237,16 @@ router.post("/logout", (req: express.Request, res: express.Response) => {
                     message: "Account not found",
                 });
             }
-            let user = users[0];
-            user.authToken = null;
-            UserTable.update(user);
+            if (config.logoutFromAllDevices) {
+                let user = users[0];
+                user.authToken = null;
+                UserTable.update(user);
+
+                return sendResponse(res, 200, {
+                    status: "success",
+                    message: "Successfully logged out from all devices",
+                });
+            }
             return sendResponse(res, 200, {
                 status: "success",
                 message: "Successfully logged out",
