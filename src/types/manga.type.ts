@@ -5,6 +5,7 @@ export interface MangaType {
     id?: number;
     name: string;
     pic: string;
+    imagePath?: string;
     authors: string[];
     tags: string[];
     chapters?: ChapterType[];

@@ -1,10 +1,4 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    OneToMany,
-    JoinColumn,
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Like } from "./Like";
 import { Chapter } from "./Chapter";
 import { ReadProgress } from "./ReadProgress";
@@ -29,6 +23,12 @@ export class Manga {
         nullable: true,
     })
     pic: string;
+
+    @Column({
+        type: "longtext",
+        nullable: true,
+    })
+    imagePath: string;
 
     @Column("simple-array", { nullable: true })
     authors: string[];

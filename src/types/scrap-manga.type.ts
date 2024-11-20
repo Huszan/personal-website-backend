@@ -8,6 +8,7 @@ export interface ScrapMangaType {
     authors: string[];
     tags: string[];
     description: string;
+    beforeUrl?: string;
 
     chaptersScrap: ScrapChapterType;
     pagesLocate: HtmlLocateType;

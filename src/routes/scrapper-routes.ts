@@ -24,15 +24,17 @@ router.post(
                     message: "You are not authorized to do this action!",
                 });
             }
-
-            const data = await AdvancedScrapper.getMangaData({
-                chapters: {
-                    name: scrapData.chaptersScrap.nameLocate,
-                    url: scrapData.chaptersScrap.urlLocate,
+            const data = await AdvancedScrapper.getMangaData(
+                {
+                    chapters: {
+                        name: scrapData.chaptersScrap.nameLocate,
+                        url: scrapData.chaptersScrap.urlLocate,
+                    },
+                    pages: scrapData.pagesLocate,
                 },
-                pages: scrapData.pagesLocate,
-            });
-            if (!data) return null;
+                scrapData.beforeUrl
+            );
+            if (!data) throw Error("No data found!");
 
             const manga: MangaType = {
                 name: scrapData.name,

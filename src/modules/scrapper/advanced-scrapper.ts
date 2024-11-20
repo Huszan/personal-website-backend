@@ -13,23 +13,27 @@ export class AdvancedScrapper {
     private static manager;
 
     static axiosSetup() {
-        this.axiosInstance = axios.create();
+        this.axiosInstance = axios.create({ timeout: 5000 });
         this.axiosInstance.interceptors.response.use(
             (response) => response,
-            (error) => {
-                const { config, response } = error;
+            async (error) => {
+                const { config, response, code } = error;
                 const retryCount = config.retryCount || 0;
 
-                if (!response && retryCount < 5) {
+                // Check for transient network errors
+                const transientErrorCodes = ["ECONNABORTED", "ENETUNREACH"];
+
+                if (
+                    !response &&
+                    retryCount < 5 &&
+                    transientErrorCodes.includes(code)
+                ) {
                     config.retryCount = retryCount + 1;
 
                     const delay = retryCount * 1000;
-                    return new Promise((resolve) =>
-                        setTimeout(
-                            () => resolve(this.axiosInstance(config)),
-                            delay
-                        )
-                    );
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+
+                    return this.axiosInstance(config);
                 }
 
                 throw error;
@@ -77,13 +81,9 @@ export class AdvancedScrapper {
                         let pagesLocate = JSON.parse(
                             JSON.stringify(localisation.pages)
                         );
-                        if (beforeUrl) {
-                            pagesLocate.urls = [
-                                `${beforeUrl}${chapterLinks[i]}`,
-                            ];
-                        } else {
-                            pagesLocate.urls = [chapterLinks[i]];
-                        }
+                        pagesLocate.urls = chapterLinks.map(
+                            (link) => `${beforeUrl ? beforeUrl : ""}${link}`
+                        );
                         let pages: PageType[] = [];
                         let pageEntries = await this.gatherEntries(pagesLocate);
                         for (let page of pageEntries) {
@@ -101,9 +101,8 @@ export class AdvancedScrapper {
                     })
                 );
             }
-
             if (chapters.length === 0) {
-                return null;
+                throw new Error("No chapters found!");
             }
             chapters.sort((a, b) => a.index - b.index);
 
@@ -131,8 +130,8 @@ export class AdvancedScrapper {
             return manga;
         } catch (error) {
             console.log(
-                "Something went wrong during getting manga data.\n",
-                error
+                "Something went wrong during getting manga data: ",
+                error.message
             );
             return null;
         }
@@ -199,8 +198,7 @@ export class AdvancedScrapper {
             }
             return null;
         } catch (error) {
-            console.error("Error fetching page HTML:", error);
-            throw error;
+            console.error("Error fetching page HTML: ", error.message);
         }
     }
 

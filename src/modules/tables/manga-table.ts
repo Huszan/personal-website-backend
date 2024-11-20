@@ -5,6 +5,7 @@ import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
+import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -13,6 +14,7 @@ export async function create(data: Manga) {
     if (data.chapters) data.chapter_count = data.chapters.length;
     data.added_date = new Date();
     data.last_update_date = new Date();
+    data.imagePath = await saveImageFromUrl(data.pic, data.name);
     return repository.save(data);
 }
 
@@ -45,13 +47,21 @@ export async function update(id: number, data?: Manga, updateDate = false) {
         if (updateDate) {
             entry.last_update_date = new Date();
         }
+        if (!entry.imagePath) {
+            entry.imagePath = await saveImageFromUrl(entry.pic, entry.name);
+        }
         return repository.save(entry);
     }
 }
 
 export async function remove(manga: Manga) {
     if (manga) {
-        return repository.remove(manga);
+        const removedManga = await repository.remove(manga);
+        if (removedManga) {
+            if (removedManga.imagePath) removeImage(removedManga.imagePath);
+            return removedManga;
+        }
+        return null;
     }
 }
 
@@ -142,6 +152,7 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         id: entry.id,
         name: entry.name,
         pic: entry.pic,
+        imagePath: entry.imagePath,
         authors: entry.authors,
         tags: entry.tags,
         lastUpdateDate: entry.last_update_date,
