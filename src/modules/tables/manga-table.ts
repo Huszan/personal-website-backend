@@ -3,9 +3,11 @@ import { Manga } from "../../entity/Manga";
 import { MangaType } from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
+import * as HtmlLocateTable from "../tables/html-locate-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
 import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
+import { HtmlLocateType } from "../../types/html-locate.type";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -123,7 +125,10 @@ export async function readTags(amountPerRead = 1000) {
     return tags;
 }
 
-export function convertDataToTableEntry(data: MangaType): Manga {
+export function convertDataToTableEntry(
+    data: MangaType,
+    htmlLocateList?: HtmlLocateType[]
+): Manga {
     let entry = new Manga();
     if (data.id) entry.id = data.id;
     entry.name = data.name;
@@ -140,6 +145,11 @@ export function convertDataToTableEntry(data: MangaType): Manga {
     entry.view_count = data.viewCount;
     entry.description = data.description;
     entry.chapter_count = data.chapterCount;
+    if (htmlLocateList) {
+        entry.htmlLocateList = htmlLocateList.map((locate) =>
+            HtmlLocateTable.convertDataToTableEntry(locate)
+        );
+    }
     return entry;
 }
 

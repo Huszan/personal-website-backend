@@ -13,6 +13,7 @@ import { RepositoryFindOptions } from "../types/repository-find-options";
 import { UserTokenData } from "../types/user-token-data.type";
 import { verifyToken } from "../modules/token-validation";
 import { getCache, setCache } from "../helper/cache.helper";
+import { HtmlLocateType } from "../types/html-locate.type";
 
 const router = express.Router();
 
@@ -22,6 +23,8 @@ router.post(
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData: MangaType = req.body.manga;
+            const htmlLocateList: HtmlLocateType[] | undefined =
+                req.body.htmlLocateList;
             const userData: UserTokenData = req["tokenData"]
                 ? req["tokenData"]
                 : undefined;
@@ -53,7 +56,10 @@ router.post(
                 });
             }
 
-            const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
+            const manga: Manga = MangaTable.convertDataToTableEntry(
+                mangaData,
+                htmlLocateList
+            );
             const results = await MangaTable.create(manga);
             CascheTable.clearAllEntries();
 

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Like } from "./Like";
 import { Chapter } from "./Chapter";
 import { ReadProgress } from "./ReadProgress";
+import { HtmlLocate } from "./HtmlLocate";
 
 @Entity()
 export class Manga {
@@ -77,6 +78,7 @@ export class Manga {
     @OneToMany(() => Chapter, (chapter) => chapter.manga, {
         cascade: true,
         onDelete: "CASCADE",
+        orphanedRowAction: "delete",
     })
     chapters: Chapter[];
 
@@ -85,4 +87,10 @@ export class Manga {
         onDelete: "CASCADE",
     })
     readProgress: ReadProgress[];
+
+    @OneToMany(() => HtmlLocate, (locate) => locate.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
+    htmlLocateList: HtmlLocate[];
 }

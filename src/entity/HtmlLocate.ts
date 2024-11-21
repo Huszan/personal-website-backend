@@ -1,9 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Manga } from "./Manga";
 
 @Entity()
 export class HtmlLocate {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @Column({ type: "text" })
+    entity_name: string;
 
     @Column({
         type: "json",
@@ -12,12 +16,12 @@ export class HtmlLocate {
     positions: JSON;
 
     @Column({
-        default: "img",
+        type: "longtext",
     })
     looked_type: string;
 
     @Column({
-        default: "src",
+        type: "longtext",
     })
     looked_attr: string;
 
@@ -26,4 +30,7 @@ export class HtmlLocate {
         nullable: true,
     })
     urls: JSON;
+
+    @ManyToOne(() => Manga, { onDelete: "CASCADE" })
+    manga: Manga;
 }
