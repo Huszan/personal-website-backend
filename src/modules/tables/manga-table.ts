@@ -3,11 +3,11 @@ import { Manga } from "../../entity/Manga";
 import { MangaType } from "../../types/manga.type";
 import * as LikeTable from "../tables/like-table";
 import * as ChapterTable from "../tables/chapter-table";
-import * as HtmlLocateTable from "../tables/html-locate-table";
+import * as ScrapMangaTable from "../tables/scrap-manga-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
 import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
-import { HtmlLocateType } from "../../types/html-locate.type";
+import { ScrapMangaType } from "../../types/scrap-manga.type";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -23,7 +23,6 @@ export async function create(data: Manga) {
 export async function read(options?: RepositoryFindOptions) {
     let query = repository
         .createQueryBuilder("manga")
-        .leftJoinAndSelect("manga.likes", "like")
         .loadRelationCountAndMap("manga.like_count", "manga.likes");
 
     query = TableManager.applyOptionsToQuery(query, options);
@@ -125,10 +124,7 @@ export async function readTags(amountPerRead = 1000) {
     return tags;
 }
 
-export function convertDataToTableEntry(
-    data: MangaType,
-    htmlLocateList?: HtmlLocateType[]
-): Manga {
+export function convertDataToTableEntry(data: MangaType): Manga {
     let entry = new Manga();
     if (data.id) entry.id = data.id;
     entry.name = data.name;
@@ -145,19 +141,14 @@ export function convertDataToTableEntry(
     entry.view_count = data.viewCount;
     entry.description = data.description;
     entry.chapter_count = data.chapterCount;
-    if (htmlLocateList) {
-        entry.htmlLocateList = htmlLocateList.map((locate) =>
-            HtmlLocateTable.convertDataToTableEntry(locate)
+    if (data.scrapManga)
+        entry.scrapManga = ScrapMangaTable.convertDataToTableEntry(
+            data.scrapManga
         );
-    }
     return entry;
 }
 
 export function convertTableEntryToData(entry: Manga): MangaType {
-    const likes = [];
-    entry.likes.forEach((like) => {
-        likes.push(LikeTable.convertTableEntryToData(like));
-    });
     let data: MangaType = {
         id: entry.id,
         name: entry.name,
@@ -168,9 +159,14 @@ export function convertTableEntryToData(entry: Manga): MangaType {
         lastUpdateDate: entry.last_update_date,
         addedDate: entry.added_date,
         viewCount: entry.view_count,
-        likes: likes,
+        likes: entry.likes
+            ? entry.likes.map((like) => LikeTable.convertTableEntryToData(like))
+            : [],
         description: entry.description,
         chapterCount: entry.chapter_count,
+        scrapManga: entry.scrapManga
+            ? ScrapMangaTable.convertTableEntryToData(entry.scrapManga)
+            : undefined,
     };
     return data;
 }

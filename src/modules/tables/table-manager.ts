@@ -14,6 +14,8 @@ export class TableManager {
         }
         if (options.take) query.take(options.take);
         if (options.skip) query.skip(options.skip);
+        if (options.relations)
+            query.setFindOptions({ relations: options.relations });
         return query;
     }
 

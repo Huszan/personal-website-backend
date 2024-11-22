@@ -14,6 +14,8 @@ import { UserTokenData } from "../types/user-token-data.type";
 import { verifyToken } from "../modules/token-validation";
 import { getCache, setCache } from "../helper/cache.helper";
 import { HtmlLocateType } from "../types/html-locate.type";
+import { ScrapManga } from "../entity/ScrapManga";
+import { ScrapMangaType } from "../types/scrap-manga.type";
 
 const router = express.Router();
 
@@ -23,8 +25,6 @@ router.post(
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData: MangaType = req.body.manga;
-            const htmlLocateList: HtmlLocateType[] | undefined =
-                req.body.htmlLocateList;
             const userData: UserTokenData = req["tokenData"]
                 ? req["tokenData"]
                 : undefined;
@@ -56,10 +56,7 @@ router.post(
                 });
             }
 
-            const manga: Manga = MangaTable.convertDataToTableEntry(
-                mangaData,
-                htmlLocateList
-            );
+            const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
             const results = await MangaTable.create(manga);
             CascheTable.clearAllEntries();
 
@@ -68,6 +65,7 @@ router.post(
                 data: results, // Assuming `results` contains the created manga details
             });
         } catch (error) {
+            console.log(error.message);
             return sendResponse(res, 500, {
                 status: "error",
                 message: "An error occurred while creating the manga",
@@ -183,9 +181,13 @@ router.get(
         const mangaId: number | undefined = req.params.id
             ? parseInt(req.params.id)
             : undefined;
+        const options: RepositoryFindOptions | undefined = req.query.options
+            ? (JSON.parse(req.query.options as string) as RepositoryFindOptions)
+            : undefined;
 
         try {
             const manga = await MangaTable.read({
+                ...options,
                 where: [{ element: "manga.id", value: mangaId }],
             });
 

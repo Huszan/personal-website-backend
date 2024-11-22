@@ -1,8 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToMany,
+    OneToOne,
+    JoinColumn,
+} from "typeorm";
 import { Like } from "./Like";
 import { Chapter } from "./Chapter";
 import { ReadProgress } from "./ReadProgress";
-import { HtmlLocate } from "./HtmlLocate";
+import { ScrapManga } from "./ScrapManga";
 
 @Entity()
 export class Manga {
@@ -61,6 +68,7 @@ export class Manga {
     @OneToMany(() => Like, (like) => like.manga, {
         cascade: true,
         onDelete: "CASCADE",
+        eager: true,
     })
     likes: Like[];
 
@@ -88,9 +96,7 @@ export class Manga {
     })
     readProgress: ReadProgress[];
 
-    @OneToMany(() => HtmlLocate, (locate) => locate.manga, {
-        cascade: true,
-        onDelete: "CASCADE",
-    })
-    htmlLocateList: HtmlLocate[];
+    @OneToOne(() => ScrapManga, { cascade: true })
+    @JoinColumn()
+    scrapManga: ScrapManga;
 }

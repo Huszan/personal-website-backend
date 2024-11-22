@@ -8,6 +8,7 @@ import { Chapter } from "./entity/Chapter";
 import { Page } from "./entity/Page";
 import { Cache } from "./entity/Cache";
 import { ReadProgress } from "./entity/ReadProgress";
+import { ScrapManga } from "./entity/ScrapManga";
 
 const dataSource = new DataSource({
     type: "mysql",
@@ -27,6 +28,7 @@ const dataSource = new DataSource({
         Page,
         Cache,
         ReadProgress,
+        ScrapManga,
     ],
     migrations: [],
     subscribers: [],
