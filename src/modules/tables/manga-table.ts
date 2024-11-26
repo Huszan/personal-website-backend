@@ -7,6 +7,8 @@ import * as ScrapMangaTable from "../tables/scrap-manga-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
 import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
+import fs = require("fs");
+import path = require("path");
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -25,7 +27,17 @@ export async function read(options?: RepositoryFindOptions) {
         .loadRelationCountAndMap("manga.like_count", "manga.likes");
 
     query = TableManager.applyOptionsToQuery(query, options);
-    return query.getMany();
+    let mangaList = await query.getMany();
+    // Ensure that manga has local images
+    for (let manga of mangaList) {
+        if (manga.imagePath && fs.existsSync(path.resolve(manga.imagePath)))
+            continue;
+        else {
+            manga.imagePath = await saveImageFromUrl(manga.pic, manga.name);
+            update(manga.id, manga);
+        }
+    }
+    return mangaList;
 }
 
 export async function update(id: number, data?: Manga, updateDate = false) {
