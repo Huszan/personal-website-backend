@@ -7,7 +7,6 @@ import * as ScrapMangaTable from "../tables/scrap-manga-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
 import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
-import { ScrapMangaType } from "../../types/scrap-manga.type";
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -55,11 +54,17 @@ export async function update(id: number, data?: Manga, updateDate = false) {
     }
 }
 
-export async function remove(manga: Manga) {
+export async function remove(id: number) {
+    const manga = await repository.findOne({
+        where: { id: id },
+        relations: ["scrapManga"],
+    });
     if (manga) {
         const removedManga = await repository.remove(manga);
         if (removedManga) {
             if (removedManga.imagePath) removeImage(removedManga.imagePath);
+            if (removedManga.scrapManga)
+                ScrapMangaTable.remove(removedManga.scrapManga.id);
             return removedManga;
         }
         return null;

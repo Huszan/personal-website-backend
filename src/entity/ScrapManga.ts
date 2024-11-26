@@ -4,8 +4,10 @@ import {
     Column,
     OneToMany,
     JoinColumn,
+    OneToOne,
 } from "typeorm";
 import { HtmlLocate } from "./HtmlLocate";
+import { Manga } from "./Manga";
 
 @Entity()
 export class ScrapManga {
@@ -22,4 +24,7 @@ export class ScrapManga {
     })
     @JoinColumn()
     htmlLocateList: HtmlLocate[];
+
+    @OneToOne(() => Manga)
+    manga: Manga;
 }

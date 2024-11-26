@@ -1,10 +1,4 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    JoinColumn,
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { ScrapManga } from "./ScrapManga";
 
 @Entity()
@@ -37,6 +31,6 @@ export class HtmlLocate {
     })
     urls: JSON;
 
-    @ManyToOne(() => ScrapManga)
+    @ManyToOne(() => ScrapManga, { onDelete: "CASCADE" })
     scrapManga: ScrapManga;
 }

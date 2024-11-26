@@ -86,7 +86,6 @@ export class Manga {
     @OneToMany(() => Chapter, (chapter) => chapter.manga, {
         cascade: true,
         onDelete: "CASCADE",
-        orphanedRowAction: "delete",
     })
     chapters: Chapter[];
 
@@ -96,7 +95,10 @@ export class Manga {
     })
     readProgress: ReadProgress[];
 
-    @OneToOne(() => ScrapManga, { cascade: true })
+    @OneToOne(() => ScrapManga, (scrap) => scrap.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
     @JoinColumn()
     scrapManga: ScrapManga;
 }
