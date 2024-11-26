@@ -19,7 +19,7 @@ export class Chapter {
     })
     name: string;
 
-    @Column()
+    @Column({ nullable: true })
     manga_id: number;
 
     @OneToMany(() => Page, (page) => page.chapter, {
@@ -28,7 +28,10 @@ export class Chapter {
     })
     pages: Page[];
 
-    @ManyToOne(() => Manga, { onDelete: "CASCADE" })
+    @ManyToOne(() => Manga, {
+        onDelete: "CASCADE",
+        orphanedRowAction: "delete",
+    })
     @JoinColumn({ name: "manga_id", referencedColumnName: "id" })
     manga: Manga;
 }

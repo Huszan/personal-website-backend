@@ -62,6 +62,65 @@ router.post(
                 data: results, // Assuming `results` contains the created manga details
             });
         } catch (error) {
+            console.log(error.message);
+            return sendResponse(res, 500, {
+                status: "error",
+                message: "An error occurred while creating the manga",
+            });
+        }
+    }
+);
+
+router.put(
+    "/manga/:id",
+    verifyToken,
+    async (req: express.Request, res: express.Response): Promise<any> => {
+        try {
+            const { id } = req.params;
+            const mangaData: MangaType = req.body.manga;
+            const userData: UserTokenData = req["tokenData"]
+                ? req["tokenData"]
+                : undefined;
+
+            if (userData === undefined || userData.accountType !== "admin") {
+                return sendResponse(res, 403, {
+                    status: "error",
+                    message: "You are not authorized to do this action!",
+                });
+            }
+            if (
+                !mangaData ||
+                !mangaData.name ||
+                !mangaData.pic ||
+                !mangaData.authors ||
+                !mangaData.tags ||
+                !mangaData.likes ||
+                !mangaData.description
+            ) {
+                return sendResponse(res, 400, {
+                    status: "error",
+                    message: "Missing required fields",
+                });
+            }
+
+            if (mangaData.id !== Number(id))
+                return sendResponse(res, 400, {
+                    status: "error",
+                    message: "Invalid manga id passed",
+                });
+
+            const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
+
+            const results = await MangaTable.update(Number(id), manga, true);
+            CascheTable.clearAllEntries();
+
+            return sendResponse(res, 200, {
+                status: "success",
+                message: "Manga successfully updated",
+                data: results,
+            });
+        } catch (error) {
+            console.log(error.message);
             return sendResponse(res, 500, {
                 status: "error",
                 message: "An error occurred while creating the manga",
@@ -74,7 +133,7 @@ router.delete(
     "/manga/:id",
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
-        const mangaId = req.params.id;
+        const mangaId = Number(req.params.id);
         const userData: UserTokenData = req["tokenData"]
             ? req["tokenData"]
             : undefined;
@@ -93,15 +152,10 @@ router.delete(
                 });
             }
 
-            const manga = await MangaTable.read({
-                where: [{ element: "manga.id", value: mangaId }],
-            });
-            const mangaRemoved = manga
-                ? await MangaTable.remove(manga[0])
-                : false;
+            const mangaRemoved = await MangaTable.remove(mangaId);
 
             if (mangaRemoved) {
-                CascheTable.clearAllEntries();
+                await CascheTable.clearAllEntries();
                 return sendResponse(res, 200, {
                     status: "success",
                     message: "Manga removed successfully",
@@ -177,9 +231,13 @@ router.get(
         const mangaId: number | undefined = req.params.id
             ? parseInt(req.params.id)
             : undefined;
+        const options: RepositoryFindOptions | undefined = req.query.options
+            ? (JSON.parse(req.query.options as string) as RepositoryFindOptions)
+            : undefined;
 
         try {
             const manga = await MangaTable.read({
+                ...options,
                 where: [{ element: "manga.id", value: mangaId }],
             });
 
@@ -325,7 +383,6 @@ router.post(
             if (existingLike) {
                 // User is removing their like (dislike)
                 await LikeTable.remove(existingLike.id);
-                await MangaTable.update(existingLike.manga_id);
                 return sendResponse(res, 200, {
                     status: "success",
                     message: "Your dislike has been noted",
@@ -335,7 +392,6 @@ router.post(
                 // User is adding a like
                 const like = LikeTable.convertDataToTableEntry(likeData);
                 const createdLike = await LikeTable.create(like);
-                await MangaTable.update(createdLike.manga_id);
                 return sendResponse(res, 201, {
                     status: "success",
                     message: "Your like has been noted",

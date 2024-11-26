@@ -1,7 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToMany,
+    OneToOne,
+    JoinColumn,
+} from "typeorm";
 import { Like } from "./Like";
 import { Chapter } from "./Chapter";
 import { ReadProgress } from "./ReadProgress";
+import { ScrapManga } from "./ScrapManga";
 
 @Entity()
 export class Manga {
@@ -60,6 +68,7 @@ export class Manga {
     @OneToMany(() => Like, (like) => like.manga, {
         cascade: true,
         onDelete: "CASCADE",
+        eager: true,
     })
     likes: Like[];
 
@@ -85,4 +94,11 @@ export class Manga {
         onDelete: "CASCADE",
     })
     readProgress: ReadProgress[];
+
+    @OneToOne(() => ScrapManga, (scrap) => scrap.manga, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn()
+    scrapManga: ScrapManga;
 }

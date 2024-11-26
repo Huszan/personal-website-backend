@@ -9,9 +9,14 @@ export interface RepositoryOrder {
     sort: "ASC" | "DESC";
 }
 
+export interface RepositoryRelation {
+    [key: string]: boolean;
+}
+
 export interface RepositoryFindOptions {
     where?: RepositoryWhere[];
     skip?: number;
     take?: number;
     order?: RepositoryOrder;
+    relations?: RepositoryRelation;
 }

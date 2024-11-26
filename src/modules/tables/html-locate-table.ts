@@ -39,6 +39,7 @@ export async function remove(id?: number) {
 export function convertDataToTableEntry(data: HtmlLocateType): HtmlLocate {
     let entry = new HtmlLocate();
     if (data.id) entry.id = data.id;
+    entry.entity_name = data.entityName;
     if (data.urls) entry.urls = JSON.parse(JSON.stringify(data.urls));
     if (data.positions)
         entry.positions = JSON.parse(JSON.stringify(data.positions));
@@ -50,6 +51,7 @@ export function convertDataToTableEntry(data: HtmlLocateType): HtmlLocate {
 export function convertTableEntryToData(entry: HtmlLocate): HtmlLocateType {
     let data: HtmlLocateType = {
         id: entry.id,
+        entityName: entry.entity_name,
         urls: JSON.parse(JSON.stringify(entry.urls)),
         positions: JSON.parse(JSON.stringify(entry.positions)),
         lookedType: entry.looked_type,
