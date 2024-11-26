@@ -81,22 +81,27 @@ export class AdvancedScrapper {
                         let pagesLocate = JSON.parse(
                             JSON.stringify(localisation.pages)
                         );
-                        pagesLocate.urls = chapterLinks.map(
-                            (link) => `${beforeUrl ? beforeUrl : ""}${link}`
-                        );
-                        let pages: PageType[] = [];
+                        pagesLocate.urls = [
+                            `${beforeUrl ? beforeUrl : ""}${chapterLinks[i]}`,
+                        ];
+
                         let pageEntries = await this.gatherEntries(pagesLocate);
-                        for (let page of pageEntries) {
-                            pages.push({
+                        let pages: PageType[] = pageEntries.map((page) => {
+                            return {
                                 url: page,
-                            });
-                        }
+                            };
+                        });
+
                         if (pages.length > 0) {
                             chapters.push({
                                 name: chapterName,
                                 pages: pages,
                                 index: i,
                             });
+                        } else {
+                            throw new Error(
+                                `There is a problem processing ${chapterName}`
+                            );
                         }
                     })
                 );

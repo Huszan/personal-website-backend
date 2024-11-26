@@ -78,7 +78,9 @@ router.post(
         } catch (error) {
             return sendResponse(res, 500, {
                 status: "error",
-                message: "An error occurred while testing scrapper form",
+                message: error.message
+                    ? error.message
+                    : "An error occurred while testing scrapper form",
             });
         }
     }
