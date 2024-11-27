@@ -22,6 +22,10 @@ export function saveImageFromUrl(
             const filePath = path.join(publicImagesDir, fileName);
 
             fs.writeFileSync(filePath, response.data);
+            console.log(
+                "File saved",
+                `${process.env.BACKEND_URL}/public/images/${fileName}`
+            );
             res(`${process.env.BACKEND_URL}/public/images/${fileName}`);
         } catch (e) {
             console.log(

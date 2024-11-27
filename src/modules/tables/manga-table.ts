@@ -27,29 +27,30 @@ export async function read(options?: RepositoryFindOptions) {
         .loadRelationCountAndMap("manga.like_count", "manga.likes");
 
     query = TableManager.applyOptionsToQuery(query, options);
-    let mangaList = await query.getMany();
-    // Ensure that manga has local images
-    for (let manga of mangaList) {
-        if (manga.imagePath && fs.existsSync(path.resolve(manga.imagePath)))
-            continue;
-        else {
-            manga.imagePath = await saveImageFromUrl(manga.pic, manga.name);
-            update(manga.id, manga);
+
+    try {
+        let mangaList = await query.getMany();
+        // Ensure that manga has local images
+        for (let manga of mangaList) {
+            if (
+                manga.imagePath &&
+                fs.existsSync(path.resolve(manga.imagePath))
+            ) {
+                continue;
+            } else {
+                await update(manga.id, manga);
+            }
         }
+        return mangaList;
+    } catch (e) {
+        console.error(e);
+        return null;
     }
-    return mangaList;
 }
 
 export async function update(id: number, data?: Manga, updateDate = false) {
-    let entries = await read({
-        where: [
-            {
-                element: "manga.id",
-                value: id,
-            },
-        ],
-    });
-    let entry = entries[0];
+    let entry = await repository.findOne({ where: { id: id } });
+
     if (entry) {
         for (let para in data) {
             if (JSON.stringify(entry[para]) !== JSON.stringify(data[para])) {
@@ -59,7 +60,7 @@ export async function update(id: number, data?: Manga, updateDate = false) {
         if (updateDate) {
             entry.last_update_date = new Date();
         }
-        if (!entry.imagePath) {
+        if (!entry.imagePath || !fs.existsSync(path.resolve(entry.imagePath))) {
             entry.imagePath = await saveImageFromUrl(entry.pic, entry.name);
         }
         return repository.save(entry);
