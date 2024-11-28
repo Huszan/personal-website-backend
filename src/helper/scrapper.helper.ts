@@ -7,6 +7,12 @@ if (!fs.existsSync(publicImagesDir)) {
     fs.mkdirSync(publicImagesDir, { recursive: true });
 }
 
+export function imageExists(url: string) {
+    const fileName = path.basename(url);
+    const localPath = path.join(publicImagesDir, fileName);
+    return fs.existsSync(localPath);
+}
+
 export function saveImageFromUrl(
     url: string,
     filename: string
@@ -58,8 +64,8 @@ export function removeImage(url: string): Promise<string | null> {
 
 function sanitizeFileName(str: string) {
     const sanitized = str
-        .replace(/[\/\\:*?"<>|]/g, "_")
+        .toLowerCase()
         .replace(/\s+/g, "_")
-        .toLowerCase();
+        .replace(/[^a-z0-9_]/g, "");
     return sanitized;
 }

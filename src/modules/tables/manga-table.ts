@@ -6,7 +6,11 @@ import * as ChapterTable from "../tables/chapter-table";
 import * as ScrapMangaTable from "../tables/scrap-manga-table";
 import { RepositoryFindOptions } from "../../types/repository-find-options";
 import { TableManager } from "./table-manager";
-import { removeImage, saveImageFromUrl } from "../../helper/scrapper.helper";
+import {
+    imageExists,
+    removeImage,
+    saveImageFromUrl,
+} from "../../helper/scrapper.helper";
 import fs = require("fs");
 import path = require("path");
 
@@ -30,12 +34,9 @@ export async function read(options?: RepositoryFindOptions) {
 
     try {
         let mangaList = await query.getMany();
-        // Ensure that manga has local images
         for (let manga of mangaList) {
-            if (
-                manga.imagePath &&
-                fs.existsSync(path.resolve(manga.imagePath))
-            ) {
+            if (!manga.imagePath) continue;
+            if (imageExists(manga.imagePath)) {
                 continue;
             } else {
                 await update(manga.id, manga);
@@ -60,10 +61,12 @@ export async function update(id: number, data?: Manga, updateDate = false) {
         if (updateDate) {
             entry.last_update_date = new Date();
         }
-        if (!entry.imagePath || !fs.existsSync(path.resolve(entry.imagePath))) {
+        if (!entry.imagePath || !imageExists(entry.imagePath)) {
             entry.imagePath = await saveImageFromUrl(entry.pic, entry.name);
         }
-        return repository.save(entry);
+
+        const newEntry = await repository.save(entry);
+        return newEntry;
     }
 }
 
