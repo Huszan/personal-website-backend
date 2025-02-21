@@ -146,13 +146,11 @@ router.post("/login", (req: express.Request, res: express.Response) => {
                 loginUser[0].password
             ).then((isPasswordValid) => {
                 if (isPasswordValid) {
-                    if (!loginUser[0].authToken) {
-                        loginUser[0].authToken = generateToken({
-                            id: loginUser[0].id,
-                            accountType: loginUser[0].accountType,
-                        } as UserTokenData);
-                        UserTable.update(loginUser[0]);
-                    }
+                    loginUser[0].authToken = generateToken({
+                        id: loginUser[0].id,
+                        accountType: loginUser[0].accountType,
+                    } as UserTokenData);
+                    UserTable.update(loginUser[0]);
                     return sendResponse(res, 200, {
                         status: "success",
                         message: "Successfully logged in",
