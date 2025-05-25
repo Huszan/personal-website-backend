@@ -1,6 +1,5 @@
 import * as express from 'express';
 import { ReadProgressType } from '../types/read-progress.type';
-import { sendResponse } from '../helper/SendResponseHelper';
 import { ReadProgress } from '../entity/ReadProgress';
 import { AppDataSource } from '../data-source';
 import { Equal } from 'typeorm';
@@ -8,6 +7,7 @@ import {
     convertDataToTableEntry,
     convertTableEntryToData,
 } from '../modules/tables/read-progress-table';
+import { sendResponse } from '../helper/route.helper';
 
 const router = express.Router();
 const repo = AppDataSource.manager.getRepository(ReadProgress);

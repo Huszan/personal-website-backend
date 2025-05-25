@@ -1,5 +1,4 @@
 import * as express from 'express';
-import { sendResponse } from '../helper/SendResponseHelper';
 import { MangaType } from '../types/manga.type';
 import { Manga } from '../entity/Manga';
 import * as MangaTable from '../modules/tables/manga-table';
@@ -10,9 +9,9 @@ import * as CascheTable from '../modules/tables/cache-table';
 import { LikeType } from '../types/like.type';
 import { ChapterType } from '../types/chapter.type';
 import { RepositoryFindOptions } from '../types/repository-find-options';
-import { UserTokenData } from '../types/user-token-data.type';
 import { verifyToken } from '../modules/token-validation';
 import { getCache, setCache } from '../helper/cache.helper';
+import { sendResponse, validateAdminToken } from '../helper/route.helper';
 
 const router = express.Router();
 
@@ -22,16 +21,7 @@ router.post(
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData: MangaType = req.body.manga;
-            const userData: UserTokenData = req['tokenData']
-                ? req['tokenData']
-                : undefined;
-
-            if (userData === undefined || userData.accountType !== 'admin') {
-                return sendResponse(res, 403, {
-                    status: 'error',
-                    message: 'You are not authorized to do this action!',
-                });
-            }
+            if (!validateAdminToken(req, res)) return;
 
             // Validate mangaData here (e.g., check for required fields)
             if (
@@ -78,16 +68,7 @@ router.put(
         try {
             const { id } = req.params;
             const mangaData: MangaType = req.body.manga;
-            const userData: UserTokenData = req['tokenData']
-                ? req['tokenData']
-                : undefined;
-
-            if (userData === undefined || userData.accountType !== 'admin') {
-                return sendResponse(res, 403, {
-                    status: 'error',
-                    message: 'You are not authorized to do this action!',
-                });
-            }
+            if (!validateAdminToken(req, res)) return;
             if (
                 !mangaData ||
                 !mangaData.name ||
@@ -133,17 +114,9 @@ router.delete(
     '/manga/:id',
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
-        const mangaId = Number(req.params.id);
-        const userData: UserTokenData = req['tokenData']
-            ? req['tokenData']
-            : undefined;
         try {
-            if (userData === undefined || userData.accountType !== 'admin') {
-                return sendResponse(res, 403, {
-                    status: 'error',
-                    message: 'You are not authorized to do this action!',
-                });
-            }
+            const mangaId = Number(req.params.id);
+            if (!validateAdminToken(req, res)) return;
 
             if (!mangaId) {
                 return sendResponse(res, 400, {

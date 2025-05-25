@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { sendResponse } from '../helper/SendResponseHelper';
+import { sendResponse } from '../helper/route.helper';
 
 export const generateToken = <T extends object | string>(data: T) => {
     if (!process.env.JWT_SECRET) {

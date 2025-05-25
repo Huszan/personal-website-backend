@@ -1,10 +1,9 @@
 import * as express from 'express';
 import { verifyToken } from '../modules/token-validation';
-import { sendResponse } from '../helper/SendResponseHelper';
-import { UserTokenData } from '../types/user-token-data.type';
 import { AdvancedScrapper } from '../modules/scrapper/advanced-scrapper';
 import { MangaType } from '../types/manga.type';
 import { HtmlLocateType } from '../types/html-locate.type';
+import { sendResponse, validateAdminToken } from '../helper/route.helper';
 
 const router = express.Router();
 
@@ -22,16 +21,7 @@ router.post(
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData = req.body.data as MangaType;
-            const userData: UserTokenData = req['tokenData']
-                ? req['tokenData']
-                : undefined;
-
-            if (userData === undefined || userData.accountType !== 'admin') {
-                return sendResponse(res, 403, {
-                    status: 'error',
-                    message: 'You are not authorized to do this action!',
-                });
-            }
+            if (!validateAdminToken(req, res)) return;
             const data = await AdvancedScrapper.getMangaData(
                 {
                     chapters: {

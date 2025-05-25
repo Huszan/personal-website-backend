@@ -1,5 +1,4 @@
 import * as express from 'express';
-import { sendResponse } from '../helper/SendResponseHelper';
 import * as UserTable from '../modules/tables/user-table';
 import * as AccountHandler from '../modules/account-handler';
 import { UserType } from '../types/user.type';
@@ -11,6 +10,7 @@ import {
     defAuthLogoutConfig,
 } from '../types/auth-logout-config.type';
 import { merge } from '../helper/basic.helper';
+import { sendResponse } from '../helper/route.helper';
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as EmailHandler from '../modules/email-handler';
-import { sendResponse } from '../helper/SendResponseHelper';
 import { ContactInfo } from '../types/contact-info.type';
+import { sendResponse } from '../helper/route.helper';
 
 const router = express.Router();
 
