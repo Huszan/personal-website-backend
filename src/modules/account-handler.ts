@@ -1,8 +1,8 @@
-import * as EmailHandler from "./email-handler";
-import { User } from "../entity/User";
+import * as EmailHandler from './email-handler';
+import { User } from '../entity/User';
 
-const randomstring = require("randomstring");
-const bcrypt = require("bcrypt");
+const randomstring = require('randomstring');
+const bcrypt = require('bcrypt');
 
 export const forgotPasswordWaitingList: {
     user: User;
@@ -25,9 +25,9 @@ export async function comparePassword(password: string, hash: string) {
 export function sendConfirmationEmail(url: string, user: User, callback?: any) {
     EmailHandler.sendCustomMail(
         {
-            from: "Manga-dot",
+            from: 'Manga-dot',
             to: user.email,
-            subject: "Manga-dot: activate account",
+            subject: 'Manga-dot: activate account',
             text: `To activate your account, please click this link - 
                                 \n${url}?code=${user.verificationCode}`,
         },
@@ -43,9 +43,9 @@ export function sendPasswordResetEmail(
 ) {
     EmailHandler.sendCustomMail(
         {
-            from: "Manga-dot",
+            from: 'Manga-dot',
             to: user.email,
-            subject: "Manga-dot: activate account",
+            subject: 'Manga-dot: activate account',
             text: `To reset your account password, please click this link - 
                                 \n${url}?token=${token}`,
         },

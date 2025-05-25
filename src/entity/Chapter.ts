@@ -5,9 +5,9 @@ import {
     JoinColumn,
     ManyToOne,
     OneToMany,
-} from "typeorm";
-import { Manga } from "./Manga";
-import { Page } from "./Page";
+} from 'typeorm';
+import { Manga } from './Manga';
+import { Page } from './Page';
 
 @Entity()
 export class Chapter {
@@ -15,7 +15,7 @@ export class Chapter {
     id: number;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     name: string;
 
@@ -24,14 +24,14 @@ export class Chapter {
 
     @OneToMany(() => Page, (page) => page.chapter, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     pages: Page[];
 
     @ManyToOne(() => Manga, {
-        onDelete: "CASCADE",
-        orphanedRowAction: "delete",
+        onDelete: 'CASCADE',
+        orphanedRowAction: 'delete',
     })
-    @JoinColumn({ name: "manga_id", referencedColumnName: "id" })
+    @JoinColumn({ name: 'manga_id', referencedColumnName: 'id' })
     manga: Manga;
 }

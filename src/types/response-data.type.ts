@@ -1,4 +1,4 @@
-import { Status } from "./status.type";
+import { Status } from './status.type';
 
 export type ResponseData = {
     status: Status;

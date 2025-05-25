@@ -1,13 +1,13 @@
-import * as express from "express";
-import { ReadProgressType } from "../types/read-progress.type";
-import { sendResponse } from "../helper/SendResponseHelper";
-import { ReadProgress } from "../entity/ReadProgress";
-import { AppDataSource } from "../data-source";
-import { Equal } from "typeorm";
+import * as express from 'express';
+import { ReadProgressType } from '../types/read-progress.type';
+import { sendResponse } from '../helper/SendResponseHelper';
+import { ReadProgress } from '../entity/ReadProgress';
+import { AppDataSource } from '../data-source';
+import { Equal } from 'typeorm';
 import {
     convertDataToTableEntry,
     convertTableEntryToData,
-} from "../modules/tables/read-progress-table";
+} from '../modules/tables/read-progress-table';
 
 const router = express.Router();
 const repo = AppDataSource.manager.getRepository(ReadProgress);
@@ -29,14 +29,14 @@ const isEntityCorrect = (entity: ReadProgress) => {
 };
 
 router.post(
-    "/user/:userId/progress",
+    '/user/:userId/progress',
     async (req: express.Request, res: express.Response) => {
         const data = req.body.data as ReadProgressType;
 
         if (!isDataCorrect(data)) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "Invalid read progress data",
+                status: 'error',
+                message: 'Invalid read progress data',
             });
         }
 
@@ -53,34 +53,34 @@ router.post(
 
             if (!isEntityCorrect(progress)) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Couldnt create database entry from data provided",
+                    status: 'error',
+                    message: 'Couldnt create database entry from data provided',
                 });
             }
 
             await repo.save(progress);
             return sendResponse(res, 200, {
-                status: "success",
-                message: "Succesfully saved read progress",
+                status: 'success',
+                message: 'Succesfully saved read progress',
             });
         } catch (error) {
             return sendResponse(res, 500, {
-                status: "error",
-                message: "Failed to update progress",
+                status: 'error',
+                message: 'Failed to update progress',
             });
         }
     }
 );
 
 router.delete(
-    "/user/:userId/progress/:progressId",
+    '/user/:userId/progress/:progressId',
     async (req: express.Request, res: express.Response) => {
         const progressId = Number(req.params.progressId);
 
         if (Number.isNaN(progressId)) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "Progress id not provided",
+                status: 'error',
+                message: 'Progress id not provided',
             });
         }
 
@@ -90,18 +90,18 @@ router.delete(
             });
             if (progress === undefined) {
                 return sendResponse(res, 404, {
-                    status: "error",
-                    message: "Progress not found",
+                    status: 'error',
+                    message: 'Progress not found',
                 });
             }
             await repo.remove(progress);
             return sendResponse(res, 200, {
-                status: "success",
-                message: "Progress removed",
+                status: 'success',
+                message: 'Progress removed',
             });
         } catch (error) {
             return sendResponse(res, 500, {
-                status: "error",
+                status: 'error',
                 message: "Couldn't remove progress",
             });
         }
@@ -109,7 +109,7 @@ router.delete(
 );
 
 router.get(
-    "/user/:userId/progress/:progressId?",
+    '/user/:userId/progress/:progressId?',
     async (req: express.Request, res: express.Response) => {
         const userId = Number(req.params.userId);
         const progressId = req.params.progressId
@@ -118,58 +118,58 @@ router.get(
 
         if (Number.isNaN(userId)) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "User id not provided or invalid",
+                status: 'error',
+                message: 'User id not provided or invalid',
             });
         }
 
         try {
             if (!Number.isNaN(progressId)) {
                 let progress = await repo
-                    .createQueryBuilder("read_progress")
-                    .leftJoinAndSelect("read_progress.manga", "manga")
+                    .createQueryBuilder('read_progress')
+                    .leftJoinAndSelect('read_progress.manga', 'manga')
                     .where({ id: progressId })
                     .getOne();
 
                 if (progress === undefined) {
                     return sendResponse(res, 404, {
-                        status: "error",
-                        message: "Progress not found",
+                        status: 'error',
+                        message: 'Progress not found',
                     });
                 }
 
                 return sendResponse(res, 200, {
-                    status: "success",
-                    message: "Progress found",
+                    status: 'success',
+                    message: 'Progress found',
                     data: convertTableEntryToData(progress),
                 });
             } else {
                 const progressList = await repo
-                    .createQueryBuilder("read_progress")
-                    .leftJoinAndSelect("read_progress.manga", "manga")
-                    .leftJoinAndSelect("manga.likes", "likes")
+                    .createQueryBuilder('read_progress')
+                    .leftJoinAndSelect('read_progress.manga', 'manga')
+                    .leftJoinAndSelect('manga.likes', 'likes')
                     .where({ user_id: userId })
-                    .orderBy("read_progress.last_update_date", "DESC")
+                    .orderBy('read_progress.last_update_date', 'DESC')
                     .getMany();
 
                 if (progressList === undefined || progressList.length === 0) {
                     return sendResponse(res, 404, {
-                        status: "error",
-                        message: "No progress entries found for this user",
+                        status: 'error',
+                        message: 'No progress entries found for this user',
                     });
                 }
 
                 return sendResponse(res, 200, {
-                    status: "success",
-                    message: "Progress entries found",
+                    status: 'success',
+                    message: 'Progress entries found',
                     data: progressList.map((el) => convertTableEntryToData(el)),
                 });
             }
         } catch (error) {
             console.warn(error);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "Internal server error while retrieving progress",
+                status: 'error',
+                message: 'Internal server error while retrieving progress',
             });
         }
     }

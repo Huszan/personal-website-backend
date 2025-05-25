@@ -1,9 +1,9 @@
-import { AppDataSource } from "../../data-source";
-import { LikeType } from "../../types/like.type";
-import { Like } from "../../entity/Like";
-import * as MangaTable from "../tables/manga-table";
-import * as UserTable from "../tables/user-table";
-import { FindManyOptions } from "typeorm";
+import { AppDataSource } from '../../data-source';
+import { LikeType } from '../../types/like.type';
+import { Like } from '../../entity/Like';
+import * as MangaTable from '../tables/manga-table';
+import * as UserTable from '../tables/user-table';
+import { FindManyOptions } from 'typeorm';
 
 export const repository = AppDataSource.manager.getRepository(Like);
 
@@ -12,7 +12,7 @@ export async function create(data: Like) {
 }
 
 export async function read(options?: FindManyOptions<Like>) {
-    let query = repository.createQueryBuilder("like");
+    let query = repository.createQueryBuilder('like');
     if (options) query = query.setFindOptions(options);
     return query.getMany();
 }

@@ -1,12 +1,10 @@
-import * as express from "express";
-import { verifyToken } from "../modules/token-validation";
-import { ScrapMangaType } from "../types/scrap-manga.type";
-import { sendResponse } from "../helper/SendResponseHelper";
-import { UserTokenData } from "../types/user-token-data.type";
-import { AdvancedScrapper } from "../modules/scrapper/advanced-scrapper";
-import { MangaType } from "../types/manga.type";
-import { HtmlLocate } from "../entity/HtmlLocate";
-import { HtmlLocateType } from "../types/html-locate.type";
+import * as express from 'express';
+import { verifyToken } from '../modules/token-validation';
+import { sendResponse } from '../helper/SendResponseHelper';
+import { UserTokenData } from '../types/user-token-data.type';
+import { AdvancedScrapper } from '../modules/scrapper/advanced-scrapper';
+import { MangaType } from '../types/manga.type';
+import { HtmlLocateType } from '../types/html-locate.type';
 
 const router = express.Router();
 
@@ -19,19 +17,19 @@ function getLocateFromList(
 }
 
 router.post(
-    "/scrapper/manga",
+    '/scrapper/manga',
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData = req.body.data as MangaType;
-            const userData: UserTokenData = req["tokenData"]
-                ? req["tokenData"]
+            const userData: UserTokenData = req['tokenData']
+                ? req['tokenData']
                 : undefined;
 
-            if (userData === undefined || userData.accountType !== "admin") {
+            if (userData === undefined || userData.accountType !== 'admin') {
                 return sendResponse(res, 403, {
-                    status: "error",
-                    message: "You are not authorized to do this action!",
+                    status: 'error',
+                    message: 'You are not authorized to do this action!',
                 });
             }
             const data = await AdvancedScrapper.getMangaData(
@@ -39,21 +37,21 @@ router.post(
                     chapters: {
                         name: getLocateFromList(
                             mangaData.scrapManga.htmlLocateList,
-                            "chapterNames"
+                            'chapterNames'
                         ),
                         url: getLocateFromList(
                             mangaData.scrapManga.htmlLocateList,
-                            "chapterUrls"
+                            'chapterUrls'
                         ),
                     },
                     pages: getLocateFromList(
                         mangaData.scrapManga.htmlLocateList,
-                        "pages"
+                        'pages'
                     ),
                 },
                 mangaData.scrapManga.beforeUrl
             );
-            if (!data) throw Error("No data found!");
+            if (!data) throw Error('No data found!');
 
             const manga: MangaType = {
                 id: mangaData.id,
@@ -72,15 +70,15 @@ router.post(
             };
 
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: manga,
             });
         } catch (error) {
             return sendResponse(res, 500, {
-                status: "error",
+                status: 'error',
                 message: error.message
                     ? error.message
-                    : "An error occurred while testing scrapper form",
+                    : 'An error occurred while testing scrapper form',
             });
         }
     }

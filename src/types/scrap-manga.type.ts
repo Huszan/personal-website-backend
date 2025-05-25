@@ -1,4 +1,4 @@
-import { HtmlLocateType } from "./html-locate.type";
+import { HtmlLocateType } from './html-locate.type';
 
 export interface ScrapMangaType {
     id?: number;

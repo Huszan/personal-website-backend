@@ -1,7 +1,7 @@
-import { AppDataSource } from "../../data-source";
-import { ScrapManga } from "../../entity/ScrapManga";
-import * as HtmlLocateTable from "../tables/html-locate-table";
-import { ScrapMangaType } from "../../types/scrap-manga.type";
+import { AppDataSource } from '../../data-source';
+import { ScrapManga } from '../../entity/ScrapManga';
+import * as HtmlLocateTable from '../tables/html-locate-table';
+import { ScrapMangaType } from '../../types/scrap-manga.type';
 
 const repository = AppDataSource.manager.getRepository(ScrapManga);
 

@@ -1,18 +1,18 @@
-import { AppDataSource } from "../../data-source";
-import { Manga } from "../../entity/Manga";
-import { MangaType } from "../../types/manga.type";
-import * as LikeTable from "../tables/like-table";
-import * as ChapterTable from "../tables/chapter-table";
-import * as ScrapMangaTable from "../tables/scrap-manga-table";
-import { RepositoryFindOptions } from "../../types/repository-find-options";
-import { TableManager } from "./table-manager";
+import { AppDataSource } from '../../data-source';
+import { Manga } from '../../entity/Manga';
+import { MangaType } from '../../types/manga.type';
+import * as LikeTable from '../tables/like-table';
+import * as ChapterTable from '../tables/chapter-table';
+import * as ScrapMangaTable from '../tables/scrap-manga-table';
+import { RepositoryFindOptions } from '../../types/repository-find-options';
+import { TableManager } from './table-manager';
 import {
     imageExists,
     removeImage,
     saveImageFromUrl,
-} from "../../helper/scrapper.helper";
-import fs = require("fs");
-import path = require("path");
+} from '../../helper/scrapper.helper';
+import fs = require('fs');
+import path = require('path');
 
 const repository = AppDataSource.manager.getRepository(Manga);
 
@@ -27,8 +27,8 @@ export async function create(data: Manga) {
 
 export async function read(options?: RepositoryFindOptions) {
     let query = repository
-        .createQueryBuilder("manga")
-        .loadRelationCountAndMap("manga.like_count", "manga.likes");
+        .createQueryBuilder('manga')
+        .loadRelationCountAndMap('manga.like_count', 'manga.likes');
 
     query = TableManager.applyOptionsToQuery(query, options);
 
@@ -73,7 +73,7 @@ export async function update(id: number, data?: Manga, updateDate = false) {
 export async function remove(id: number) {
     const manga = await repository.findOne({
         where: { id: id },
-        relations: ["scrapManga"],
+        relations: ['scrapManga'],
     });
     if (manga) {
         const removedManga = await repository.remove(manga);
@@ -95,8 +95,8 @@ export async function increaseViewCount(id: number) {
 
 export async function getMangaCount(options?: RepositoryFindOptions) {
     let query = await repository
-        .createQueryBuilder("manga")
-        .select("COUNT(*)", "count");
+        .createQueryBuilder('manga')
+        .select('COUNT(*)', 'count');
     query = TableManager.applyWhereOptions(query, options);
 
     let result = await query.getRawOne();

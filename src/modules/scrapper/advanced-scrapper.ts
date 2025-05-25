@@ -1,12 +1,12 @@
-import { Cheerio, CheerioAPI, Element } from "cheerio";
-import { HtmlLocateType } from "../../types/html-locate.type";
-import { MangaType } from "../../types/manga.type";
-import { PageType } from "../../types/page.type";
-import { AxiosInstance } from "axios";
+import { Cheerio, CheerioAPI, Element } from 'cheerio';
+import { HtmlLocateType } from '../../types/html-locate.type';
+import { MangaType } from '../../types/manga.type';
+import { PageType } from '../../types/page.type';
+import { AxiosInstance } from 'axios';
 
-const axios = require("axios");
-const { ConcurrencyManager } = require("axios-concurrency");
-const cheerio = require("cheerio");
+const axios = require('axios');
+const { ConcurrencyManager } = require('axios-concurrency');
+const cheerio = require('cheerio');
 
 export class AdvancedScrapper {
     private static axiosInstance: AxiosInstance;
@@ -21,7 +21,7 @@ export class AdvancedScrapper {
                 const retryCount = config.retryCount || 0;
 
                 // Check for transient network errors
-                const transientErrorCodes = ["ECONNABORTED", "ENETUNREACH"];
+                const transientErrorCodes = ['ECONNABORTED', 'ENETUNREACH'];
 
                 if (
                     !response &&
@@ -82,7 +82,7 @@ export class AdvancedScrapper {
                             JSON.stringify(localisation.pages)
                         );
                         pagesLocate.urls = [
-                            `${beforeUrl ? beforeUrl : ""}${chapterLinks[i]}`,
+                            `${beforeUrl ? beforeUrl : ''}${chapterLinks[i]}`,
                         ];
 
                         let pageEntries = await this.gatherEntries(pagesLocate);
@@ -107,7 +107,7 @@ export class AdvancedScrapper {
                 );
             }
             if (chapters.length === 0) {
-                throw new Error("No chapters found!");
+                throw new Error('No chapters found!');
             }
             chapters.sort((a, b) => a.index - b.index);
 
@@ -135,7 +135,7 @@ export class AdvancedScrapper {
             return manga;
         } catch (error) {
             console.log(
-                "Something went wrong during getting manga data: ",
+                'Something went wrong during getting manga data: ',
                 error.message
             );
             return null;
@@ -154,7 +154,7 @@ export class AdvancedScrapper {
             htmlElements.each((index, value) => {
                 let inner$ = $(value);
                 let el =
-                    locate.lookedAttr === "content"
+                    locate.lookedAttr === 'content'
                         ? inner$.text()
                         : inner$.attr(locate.lookedAttr);
                 if (el) {
@@ -203,7 +203,7 @@ export class AdvancedScrapper {
             }
             return null;
         } catch (error) {
-            console.error("Error fetching page HTML: ", error.message);
+            console.error('Error fetching page HTML: ', error.message);
         }
     }
 

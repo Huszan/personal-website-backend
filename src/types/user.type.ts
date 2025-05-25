@@ -1,4 +1,4 @@
-import { LikeType } from "./like.type";
+import { LikeType } from './like.type';
 
 export interface UserType {
     id?: number;

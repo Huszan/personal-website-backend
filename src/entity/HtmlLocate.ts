@@ -1,36 +1,36 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { ScrapManga } from "./ScrapManga";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { ScrapManga } from './ScrapManga';
 
 @Entity()
 export class HtmlLocate {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "text" })
+    @Column({ type: 'text' })
     entity_name: string;
 
     @Column({
-        type: "json",
+        type: 'json',
         nullable: true,
     })
     positions: JSON;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     looked_type: string;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     looked_attr: string;
 
     @Column({
-        type: "json",
+        type: 'json',
         nullable: true,
     })
     urls: JSON;
 
-    @ManyToOne(() => ScrapManga, { onDelete: "CASCADE" })
+    @ManyToOne(() => ScrapManga, { onDelete: 'CASCADE' })
     scrapManga: ScrapManga;
 }

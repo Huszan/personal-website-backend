@@ -5,11 +5,11 @@ import {
     OneToMany,
     OneToOne,
     JoinColumn,
-} from "typeorm";
-import { Like } from "./Like";
-import { Chapter } from "./Chapter";
-import { ReadProgress } from "./ReadProgress";
-import { ScrapManga } from "./ScrapManga";
+} from 'typeorm';
+import { Like } from './Like';
+import { Chapter } from './Chapter';
+import { ReadProgress } from './ReadProgress';
+import { ScrapManga } from './ScrapManga';
 
 @Entity()
 export class Manga {
@@ -17,31 +17,31 @@ export class Manga {
     id: number;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     name: string;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     original_name: string;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
         nullable: true,
     })
     pic: string;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
         nullable: true,
     })
     imagePath: string;
 
-    @Column("simple-array", { nullable: true })
+    @Column('simple-array', { nullable: true })
     authors: string[];
 
-    @Column("simple-array", { nullable: true })
+    @Column('simple-array', { nullable: true })
     tags: string[];
 
     @Column()
@@ -67,13 +67,13 @@ export class Manga {
 
     @OneToMany(() => Like, (like) => like.manga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
         eager: true,
     })
     likes: Like[];
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
         nullable: true,
     })
     description: string;
@@ -85,19 +85,19 @@ export class Manga {
 
     @OneToMany(() => Chapter, (chapter) => chapter.manga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     chapters: Chapter[];
 
     @OneToMany(() => ReadProgress, (progress) => progress.manga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     readProgress: ReadProgress[];
 
     @OneToOne(() => ScrapManga, (scrap) => scrap.manga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     @JoinColumn()
     scrapManga: ScrapManga;

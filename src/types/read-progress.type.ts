@@ -1,4 +1,4 @@
-import { MangaType } from "./manga.type";
+import { MangaType } from './manga.type';
 
 export interface ReadProgressType {
     id?: number;

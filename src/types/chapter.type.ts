@@ -1,4 +1,4 @@
-import { PageType } from "./page.type";
+import { PageType } from './page.type';
 
 export interface ChapterType {
     id?: number;

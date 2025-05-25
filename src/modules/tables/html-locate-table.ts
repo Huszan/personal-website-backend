@@ -1,7 +1,7 @@
-import { HtmlLocate } from "../../entity/HtmlLocate";
-import { AppDataSource } from "../../data-source";
-import { HtmlLocateType } from "../../types/html-locate.type";
-import { Manga } from "../../entity/Manga";
+import { HtmlLocate } from '../../entity/HtmlLocate';
+import { AppDataSource } from '../../data-source';
+import { HtmlLocateType } from '../../types/html-locate.type';
+import { Manga } from '../../entity/Manga';
 
 const repository = AppDataSource.manager.getRepository(HtmlLocate);
 

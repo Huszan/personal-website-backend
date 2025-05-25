@@ -3,14 +3,14 @@ import {
     remove,
     read,
     convertDataToTableEntry,
-} from "../modules/tables/cache-table";
+} from '../modules/tables/cache-table';
 
 export async function getCache(
     key: string,
     expTime: number = 3600000
 ): Promise<string | null> {
     const cacheEntry = await read({
-        where: [{ element: "cache_key", value: key }],
+        where: [{ element: 'cache_key', value: key }],
         take: 1,
     });
 
@@ -42,7 +42,7 @@ export async function setCache(key: string, data: string) {
 export async function clearCache(key?: string) {
     if (key) {
         const cacheEntry = await read({
-            where: [{ element: "cache_key", value: key }],
+            where: [{ element: 'cache_key', value: key }],
             take: 1,
         });
         if (cacheEntry[0]) {

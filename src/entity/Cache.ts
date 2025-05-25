@@ -1,14 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Cache {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "longtext" })
+    @Column({ type: 'longtext' })
     cache_key: string;
 
-    @Column({ type: "longtext" })
+    @Column({ type: 'longtext' })
     data: string;
 
     @Column()

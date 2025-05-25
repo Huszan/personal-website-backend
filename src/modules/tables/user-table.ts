@@ -1,8 +1,8 @@
-import { AppDataSource } from "../../data-source";
-import { User } from "../../entity/User";
-import { UserType } from "../../types/user.type";
-import * as LikeTable from "./like-table";
-import { FindManyOptions } from "typeorm";
+import { AppDataSource } from '../../data-source';
+import { User } from '../../entity/User';
+import { UserType } from '../../types/user.type';
+import * as LikeTable from './like-table';
+import { FindManyOptions } from 'typeorm';
 
 const repository = AppDataSource.manager.getRepository(User);
 
@@ -12,8 +12,8 @@ export async function create(data: User) {
 
 export async function read(options?: FindManyOptions<User>) {
     let query = repository
-        .createQueryBuilder("user")
-        .leftJoinAndSelect("user.likes", "likes");
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.likes', 'likes');
     if (options) {
         query = query.setFindOptions(options);
     }

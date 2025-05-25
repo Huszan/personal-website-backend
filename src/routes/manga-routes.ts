@@ -1,35 +1,35 @@
-import * as express from "express";
-import { sendResponse } from "../helper/SendResponseHelper";
-import { MangaType } from "../types/manga.type";
-import { Manga } from "../entity/Manga";
-import * as MangaTable from "../modules/tables/manga-table";
-import * as ChapterTable from "../modules/tables/chapter-table";
-import * as PageTable from "../modules/tables/page-table";
-import * as LikeTable from "../modules/tables/like-table";
-import * as CascheTable from "../modules/tables/cache-table";
-import { LikeType } from "../types/like.type";
-import { ChapterType } from "../types/chapter.type";
-import { RepositoryFindOptions } from "../types/repository-find-options";
-import { UserTokenData } from "../types/user-token-data.type";
-import { verifyToken } from "../modules/token-validation";
-import { getCache, setCache } from "../helper/cache.helper";
+import * as express from 'express';
+import { sendResponse } from '../helper/SendResponseHelper';
+import { MangaType } from '../types/manga.type';
+import { Manga } from '../entity/Manga';
+import * as MangaTable from '../modules/tables/manga-table';
+import * as ChapterTable from '../modules/tables/chapter-table';
+import * as PageTable from '../modules/tables/page-table';
+import * as LikeTable from '../modules/tables/like-table';
+import * as CascheTable from '../modules/tables/cache-table';
+import { LikeType } from '../types/like.type';
+import { ChapterType } from '../types/chapter.type';
+import { RepositoryFindOptions } from '../types/repository-find-options';
+import { UserTokenData } from '../types/user-token-data.type';
+import { verifyToken } from '../modules/token-validation';
+import { getCache, setCache } from '../helper/cache.helper';
 
 const router = express.Router();
 
 router.post(
-    "/manga",
+    '/manga',
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const mangaData: MangaType = req.body.manga;
-            const userData: UserTokenData = req["tokenData"]
-                ? req["tokenData"]
+            const userData: UserTokenData = req['tokenData']
+                ? req['tokenData']
                 : undefined;
 
-            if (userData === undefined || userData.accountType !== "admin") {
+            if (userData === undefined || userData.accountType !== 'admin') {
                 return sendResponse(res, 403, {
-                    status: "error",
-                    message: "You are not authorized to do this action!",
+                    status: 'error',
+                    message: 'You are not authorized to do this action!',
                 });
             }
 
@@ -48,8 +48,8 @@ router.post(
                 mangaData.viewCount
             ) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Missing required fields",
+                    status: 'error',
+                    message: 'Missing required fields',
                 });
             }
 
@@ -58,34 +58,34 @@ router.post(
             CascheTable.clearAllEntries();
 
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: results, // Assuming `results` contains the created manga details
             });
         } catch (error) {
             console.log(error.message);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while creating the manga",
+                status: 'error',
+                message: 'An error occurred while creating the manga',
             });
         }
     }
 );
 
 router.put(
-    "/manga/:id",
+    '/manga/:id',
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         try {
             const { id } = req.params;
             const mangaData: MangaType = req.body.manga;
-            const userData: UserTokenData = req["tokenData"]
-                ? req["tokenData"]
+            const userData: UserTokenData = req['tokenData']
+                ? req['tokenData']
                 : undefined;
 
-            if (userData === undefined || userData.accountType !== "admin") {
+            if (userData === undefined || userData.accountType !== 'admin') {
                 return sendResponse(res, 403, {
-                    status: "error",
-                    message: "You are not authorized to do this action!",
+                    status: 'error',
+                    message: 'You are not authorized to do this action!',
                 });
             }
             if (
@@ -98,15 +98,15 @@ router.put(
                 !mangaData.description
             ) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Missing required fields",
+                    status: 'error',
+                    message: 'Missing required fields',
                 });
             }
 
             if (mangaData.id !== Number(id))
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Invalid manga id passed",
+                    status: 'error',
+                    message: 'Invalid manga id passed',
                 });
 
             const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
@@ -115,40 +115,40 @@ router.put(
             CascheTable.clearAllEntries();
 
             return sendResponse(res, 200, {
-                status: "success",
-                message: "Manga successfully updated",
+                status: 'success',
+                message: 'Manga successfully updated',
                 data: results,
             });
         } catch (error) {
             console.log(error.message);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while creating the manga",
+                status: 'error',
+                message: 'An error occurred while creating the manga',
             });
         }
     }
 );
 
 router.delete(
-    "/manga/:id",
+    '/manga/:id',
     verifyToken,
     async (req: express.Request, res: express.Response): Promise<any> => {
         const mangaId = Number(req.params.id);
-        const userData: UserTokenData = req["tokenData"]
-            ? req["tokenData"]
+        const userData: UserTokenData = req['tokenData']
+            ? req['tokenData']
             : undefined;
         try {
-            if (userData === undefined || userData.accountType !== "admin") {
+            if (userData === undefined || userData.accountType !== 'admin') {
                 return sendResponse(res, 403, {
-                    status: "error",
-                    message: "You are not authorized to do this action!",
+                    status: 'error',
+                    message: 'You are not authorized to do this action!',
                 });
             }
 
             if (!mangaId) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Manga ID is required",
+                    status: 'error',
+                    message: 'Manga ID is required',
                 });
             }
 
@@ -157,26 +157,26 @@ router.delete(
             if (mangaRemoved) {
                 await CascheTable.clearAllEntries();
                 return sendResponse(res, 200, {
-                    status: "success",
-                    message: "Manga removed successfully",
+                    status: 'success',
+                    message: 'Manga removed successfully',
                 });
             } else {
                 return sendResponse(res, 404, {
-                    status: "error",
-                    message: "Manga not found",
+                    status: 'error',
+                    message: 'Manga not found',
                 });
             }
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while removing the manga",
+                status: 'error',
+                message: 'An error occurred while removing the manga',
             });
         }
     }
 );
 
-router.get("/manga", async (req: express.Request, res: express.Response) => {
+router.get('/manga', async (req: express.Request, res: express.Response) => {
     const options: RepositoryFindOptions | undefined = req.query.options
         ? (JSON.parse(req.query.options as string) as RepositoryFindOptions)
         : undefined;
@@ -186,7 +186,7 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
         const cachedData = await getCache(cacheKey);
         if (cachedData) {
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: JSON.parse(cachedData),
             });
         }
@@ -197,7 +197,7 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
 
         for (const el of data.list) {
             el.chapter_count = await ChapterTable.getChapterCount({
-                where: [{ element: "manga_id", value: el.id }],
+                where: [{ element: 'manga_id', value: el.id }],
             });
             convertedList.push(MangaTable.convertTableEntryToData(el));
         }
@@ -210,7 +210,7 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
             })
         );
         return sendResponse(res, 200, {
-            status: "success",
+            status: 'success',
             data: {
                 list: convertedList,
                 count: data.count,
@@ -219,14 +219,14 @@ router.get("/manga", async (req: express.Request, res: express.Response) => {
     } catch (error) {
         console.error(error);
         return sendResponse(res, 500, {
-            status: "error",
-            message: "An error occurred while fetching the manga data",
+            status: 'error',
+            message: 'An error occurred while fetching the manga data',
         });
     }
 });
 
 router.get(
-    "/manga/:id",
+    '/manga/:id',
     async (req: express.Request, res: express.Response): Promise<any> => {
         const mangaId: number | undefined = req.params.id
             ? parseInt(req.params.id)
@@ -238,26 +238,26 @@ router.get(
         try {
             const manga = await MangaTable.read({
                 ...options,
-                where: [{ element: "manga.id", value: mangaId }],
+                where: [{ element: 'manga.id', value: mangaId }],
             });
 
             if (!manga || manga.length === 0) {
                 return sendResponse(res, 404, {
-                    status: "error",
-                    message: "Manga not found",
+                    status: 'error',
+                    message: 'Manga not found',
                 });
             }
 
             const mangaEntry = manga[0];
             mangaEntry.chapter_count = await ChapterTable.getChapterCount({
-                where: [{ element: "manga_id", value: mangaEntry.id }],
+                where: [{ element: 'manga_id', value: mangaEntry.id }],
             });
 
             const convertedManga =
                 MangaTable.convertTableEntryToData(mangaEntry);
 
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: {
                     manga: convertedManga,
                 },
@@ -265,33 +265,33 @@ router.get(
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while fetching the manga data.",
+                status: 'error',
+                message: 'An error occurred while fetching the manga data.',
             });
         }
     }
 );
 
 router.get(
-    "/manga/:id/chapters",
+    '/manga/:id/chapters',
     async (req: express.Request, res: express.Response): Promise<any> => {
         const mangaId: number = parseInt(req.params.id, 10);
 
         try {
             if (isNaN(mangaId)) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Invalid manga ID.",
+                    status: 'error',
+                    message: 'Invalid manga ID.',
                 });
             }
 
             const chapterList = await ChapterTable.read({
-                where: [{ element: "manga_id", value: mangaId }],
+                where: [{ element: 'manga_id', value: mangaId }],
             });
 
             if (chapterList.length === 0) {
                 return sendResponse(res, 404, {
-                    status: "error",
+                    status: 'error',
                     message: "Didn't found any chapters for this manga",
                 });
             }
@@ -303,7 +303,7 @@ router.get(
                 );
 
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: {
                     chapters: convertedList,
                 },
@@ -311,15 +311,15 @@ router.get(
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while fetching manga chapters.",
+                status: 'error',
+                message: 'An error occurred while fetching manga chapters.',
             });
         }
     }
 );
 
 router.get(
-    "/manga/:mangaId/chapters/:chapterId/pages",
+    '/manga/:mangaId/chapters/:chapterId/pages',
     async (req: express.Request, res: express.Response): Promise<any> => {
         const mangaId: number = parseInt(req.params.mangaId, 10);
         const chapterId: number = parseInt(req.params.chapterId, 10);
@@ -327,8 +327,8 @@ router.get(
         try {
             if (isNaN(mangaId) || isNaN(chapterId)) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Invalid manga ID or chapter ID.",
+                    status: 'error',
+                    message: 'Invalid manga ID or chapter ID.',
                 });
             }
 
@@ -341,7 +341,7 @@ router.get(
             await MangaTable.increaseViewCount(mangaId);
 
             return sendResponse(res, 200, {
-                status: "success",
+                status: 'success',
                 data: {
                     pages: results,
                 },
@@ -349,22 +349,22 @@ router.get(
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while fetching manga pages.",
+                status: 'error',
+                message: 'An error occurred while fetching manga pages.',
             });
         }
     }
 );
 
 router.post(
-    "/manga/like",
+    '/manga/like',
     async (req: express.Request, res: express.Response): Promise<any> => {
         const likeData: LikeType = req.body.like;
 
         // Validate input
         if (!likeData || !likeData.mangaId || !likeData.userId) {
             return sendResponse(res, 400, {
-                status: "error",
+                status: 'error',
                 message: "Didn't receive required data to process action",
             });
         }
@@ -384,8 +384,8 @@ router.post(
                 // User is removing their like (dislike)
                 await LikeTable.remove(existingLike.id);
                 return sendResponse(res, 200, {
-                    status: "success",
-                    message: "Your dislike has been noted",
+                    status: 'success',
+                    message: 'Your dislike has been noted',
                     data: existingLike,
                 });
             } else {
@@ -393,16 +393,16 @@ router.post(
                 const like = LikeTable.convertDataToTableEntry(likeData);
                 const createdLike = await LikeTable.create(like);
                 return sendResponse(res, 201, {
-                    status: "success",
-                    message: "Your like has been noted",
+                    status: 'success',
+                    message: 'Your like has been noted',
                     data: createdLike,
                 });
             }
         } catch (err) {
             console.error(err);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "An error occurred while processing your request.",
+                status: 'error',
+                message: 'An error occurred while processing your request.',
             });
         }
     }

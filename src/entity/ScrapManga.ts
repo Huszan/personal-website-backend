@@ -5,21 +5,21 @@ import {
     OneToMany,
     JoinColumn,
     OneToOne,
-} from "typeorm";
-import { HtmlLocate } from "./HtmlLocate";
-import { Manga } from "./Manga";
+} from 'typeorm';
+import { HtmlLocate } from './HtmlLocate';
+import { Manga } from './Manga';
 
 @Entity()
 export class ScrapManga {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "longtext", nullable: true })
+    @Column({ type: 'longtext', nullable: true })
     beforeUrl: string;
 
     @OneToMany(() => HtmlLocate, (locate) => locate.scrapManga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
         eager: true,
     })
     @JoinColumn()

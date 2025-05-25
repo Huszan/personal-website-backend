@@ -1,7 +1,7 @@
-import { AppDataSource } from "../../data-source";
-import { FindManyOptions } from "typeorm";
-import { Page } from "../../entity/Page";
-import { PageType } from "../../types/page.type";
+import { AppDataSource } from '../../data-source';
+import { FindManyOptions } from 'typeorm';
+import { Page } from '../../entity/Page';
+import { PageType } from '../../types/page.type';
 
 const repository = AppDataSource.manager.getRepository(Page);
 
@@ -10,7 +10,7 @@ export async function create(data: Page) {
 }
 
 export async function read(options?: FindManyOptions<Page>) {
-    let query = repository.createQueryBuilder("page");
+    let query = repository.createQueryBuilder('page');
 
     if (options) {
         query = query.setFindOptions(options);

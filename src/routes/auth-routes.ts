@@ -1,26 +1,26 @@
-import * as express from "express";
-import { sendResponse } from "../helper/SendResponseHelper";
-import * as UserTable from "../modules/tables/user-table";
-import * as AccountHandler from "../modules/account-handler";
-import { UserType } from "../types/user.type";
-import { sendPasswordResetEmail } from "../modules/account-handler";
-import { generateToken } from "../modules/token-validation";
-import { UserTokenData } from "../types/user-token-data.type";
+import * as express from 'express';
+import { sendResponse } from '../helper/SendResponseHelper';
+import * as UserTable from '../modules/tables/user-table';
+import * as AccountHandler from '../modules/account-handler';
+import { UserType } from '../types/user.type';
+import { sendPasswordResetEmail } from '../modules/account-handler';
+import { generateToken } from '../modules/token-validation';
+import { UserTokenData } from '../types/user-token-data.type';
 import {
     AuthLogoutConfig,
     defAuthLogoutConfig,
-} from "../types/auth-logout-config.type";
-import { merge } from "../helper/basic.helper";
+} from '../types/auth-logout-config.type';
+import { merge } from '../helper/basic.helper';
 
 const router = express.Router();
 
-router.post("/register", (req: express.Request, res: express.Response) => {
+router.post('/register', (req: express.Request, res: express.Response) => {
     const userData: UserType = req.body.user;
     const activateUrl: string = req.body.activateUrl;
     if (!userData || !userData.email || !userData.name || !userData.password) {
         return sendResponse(res, 400, {
-            status: "error",
-            message: "Invalid user form",
+            status: 'error',
+            message: 'Invalid user form',
         });
     }
     UserTable.read({
@@ -31,8 +31,8 @@ router.post("/register", (req: express.Request, res: express.Response) => {
     }).then(async (user) => {
         if (user[0]) {
             return sendResponse(res, 409, {
-                status: "error",
-                message: "User with this email address already exist",
+                status: 'error',
+                message: 'User with this email address already exist',
             });
         }
 
@@ -50,16 +50,16 @@ router.post("/register", (req: express.Request, res: express.Response) => {
         )
             .then((registerRes) => {
                 sendResponse(res, 201, {
-                    status: "success",
+                    status: 'success',
                     message:
-                        "User created. Check Your email to activate your account. (Remember to check spam as well)",
+                        'User created. Check Your email to activate your account. (Remember to check spam as well)',
                 });
                 AccountHandler.sendConfirmationEmail(activateUrl, registerRes);
                 return;
             })
             .catch((registerErr) => {
                 return sendResponse(res, 500, {
-                    status: "error",
+                    status: 'error',
                     message: registerErr.message,
                 });
             });
@@ -67,14 +67,14 @@ router.post("/register", (req: express.Request, res: express.Response) => {
 });
 
 router.post(
-    "/resendActivation",
+    '/resendActivation',
     (req: express.Request, res: express.Response) => {
         const email = req.body.email;
         const activateUrl: string = req.body.activateUrl;
         if (!email || !activateUrl) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "Missing form data",
+                status: 'error',
+                message: 'Missing form data',
             });
         }
         UserTable.read({
@@ -86,44 +86,44 @@ router.post(
                 let user = users[0];
                 if (!user) {
                     return sendResponse(res, 404, {
-                        status: "error",
-                        message: "User not found",
+                        status: 'error',
+                        message: 'User not found',
                     });
                 }
                 if (!user.verificationCode) {
                     return sendResponse(res, 500, {
-                        status: "success",
-                        message: "User already verified. You can log in now",
+                        status: 'success',
+                        message: 'User already verified. You can log in now',
                     });
                 }
                 AccountHandler.sendConfirmationEmail(activateUrl, user, () => {
                     return sendResponse(res, 200, {
-                        status: "success",
+                        status: 'success',
                         message:
-                            "Activation link has been sent to your email address",
+                            'Activation link has been sent to your email address',
                     });
                 });
             })
             .catch((err) => {
                 console.log(err);
                 return sendResponse(res, 500, {
-                    status: "error",
+                    status: 'error',
                     message:
-                        "Failed to send activation link. Please try again later",
+                        'Failed to send activation link. Please try again later',
                 });
             });
     }
 );
 
-router.post("/login", (req: express.Request, res: express.Response) => {
+router.post('/login', (req: express.Request, res: express.Response) => {
     const userData = {
         email: req.body.email,
         password: req.body.password,
     };
     if (!userData || !userData.email || !userData.password) {
         return sendResponse(res, 400, {
-            status: "error",
-            message: "Invalid credentials",
+            status: 'error',
+            message: 'Invalid credentials',
         });
     }
     UserTable.read({
@@ -136,8 +136,8 @@ router.post("/login", (req: express.Request, res: express.Response) => {
         .then((loginUser) => {
             if (!loginUser[0]) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Invalid credentials",
+                    status: 'error',
+                    message: 'Invalid credentials',
                 });
             }
 
@@ -152,14 +152,14 @@ router.post("/login", (req: express.Request, res: express.Response) => {
                     } as UserTokenData);
                     UserTable.update(loginUser[0]);
                     return sendResponse(res, 200, {
-                        status: "success",
-                        message: "Successfully logged in",
+                        status: 'success',
+                        message: 'Successfully logged in',
                         data: loginUser[0],
                     });
                 } else {
                     return sendResponse(res, 400, {
-                        status: "error",
-                        message: "Invalid password",
+                        status: 'error',
+                        message: 'Invalid password',
                     });
                 }
             });
@@ -167,18 +167,18 @@ router.post("/login", (req: express.Request, res: express.Response) => {
         .catch((loginErr) => {
             console.log(loginErr);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "Something went wrong. Try again later.",
+                status: 'error',
+                message: 'Something went wrong. Try again later.',
             });
         });
 });
 
-router.post("/login/token", (req: express.Request, res: express.Response) => {
+router.post('/login/token', (req: express.Request, res: express.Response) => {
     const token = req.body.token;
     if (!token) {
         return sendResponse(res, 404, {
-            status: "error",
-            message: "Auth token not found",
+            status: 'error',
+            message: 'Auth token not found',
         });
     }
     UserTable.read({
@@ -191,27 +191,27 @@ router.post("/login/token", (req: express.Request, res: express.Response) => {
         .then((loginUser) => {
             if (!loginUser[0]) {
                 return sendResponse(res, 400, {
-                    status: "error",
-                    message: "Auth code expired",
+                    status: 'error',
+                    message: 'Auth code expired',
                 });
             }
 
             return sendResponse(res, 200, {
-                status: "success",
-                message: "Successfully logged in",
+                status: 'success',
+                message: 'Successfully logged in',
                 data: loginUser[0],
             });
         })
         .catch((loginErr) => {
             console.log(loginErr);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "Something went wrong. Try again later.",
+                status: 'error',
+                message: 'Something went wrong. Try again later.',
             });
         });
 });
 
-router.post("/logout", (req: express.Request, res: express.Response) => {
+router.post('/logout', (req: express.Request, res: express.Response) => {
     const id = req.body.id;
     const config = merge(
         defAuthLogoutConfig,
@@ -219,8 +219,8 @@ router.post("/logout", (req: express.Request, res: express.Response) => {
     ) as AuthLogoutConfig;
     if (!id) {
         return sendResponse(res, 400, {
-            status: "error",
-            message: "Id was not found in request",
+            status: 'error',
+            message: 'Id was not found in request',
         });
     }
     UserTable.read({
@@ -231,8 +231,8 @@ router.post("/logout", (req: express.Request, res: express.Response) => {
         .then((users) => {
             if (!users[0]) {
                 return sendResponse(res, 404, {
-                    status: "error",
-                    message: "Account not found",
+                    status: 'error',
+                    message: 'Account not found',
                 });
             }
             if (config.logoutFromAllDevices) {
@@ -241,30 +241,30 @@ router.post("/logout", (req: express.Request, res: express.Response) => {
                 UserTable.update(user);
 
                 return sendResponse(res, 200, {
-                    status: "success",
-                    message: "Successfully logged out from all devices",
+                    status: 'success',
+                    message: 'Successfully logged out from all devices',
                 });
             }
             return sendResponse(res, 200, {
-                status: "success",
-                message: "Successfully logged out",
+                status: 'success',
+                message: 'Successfully logged out',
             });
         })
         .catch((err) => {
             console.log(err);
             return sendResponse(res, 500, {
-                status: "error",
-                message: "Something went wrong. Try again later.",
+                status: 'error',
+                message: 'Something went wrong. Try again later.',
             });
         });
 });
 
-router.post("/activate", (req: express.Request, res: express.Response) => {
+router.post('/activate', (req: express.Request, res: express.Response) => {
     const code = req.body.code;
     if (!code) {
         return sendResponse(res, 400, {
-            status: "error",
-            message: "Code not found in request",
+            status: 'error',
+            message: 'Code not found in request',
         });
     }
 
@@ -275,8 +275,8 @@ router.post("/activate", (req: express.Request, res: express.Response) => {
     }).then((users) => {
         if (!users[0]) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "Verification code expired",
+                status: 'error',
+                message: 'Verification code expired',
             });
         }
 
@@ -286,38 +286,38 @@ router.post("/activate", (req: express.Request, res: express.Response) => {
             .then((verifiedUser) => {
                 if (!verifiedUser) {
                     return sendResponse(res, 500, {
-                        status: "error",
+                        status: 'error',
                         message:
-                            "Something went wrong during user verification. Try again later.",
+                            'Something went wrong during user verification. Try again later.',
                     });
                 }
 
                 return sendResponse(res, 201, {
-                    status: "success",
+                    status: 'success',
                     message:
-                        "Account verified successfully. You can now log in!",
+                        'Account verified successfully. You can now log in!',
                 });
             })
             .catch((verifiedErr) => {
                 console.log(verifiedErr);
                 return sendResponse(res, 500, {
-                    status: "error",
+                    status: 'error',
                     message:
-                        "Something went wrong during user verification. Try again later.",
+                        'Something went wrong during user verification. Try again later.',
                 });
             });
     });
 });
 
 router.post(
-    "/forgotPassword",
+    '/forgotPassword',
     async (req: express.Request, res: express.Response) => {
         const email = req.body.email;
         const newPassword = req.body.newPassword;
         if (!email || !newPassword) {
             return sendResponse(res, 400, {
-                status: "error",
-                message: "Missing email and new password.",
+                status: 'error',
+                message: 'Missing email and new password.',
             });
         }
 
@@ -330,13 +330,13 @@ router.post(
             let user = users[0];
             if (!user) {
                 return sendResponse(res, 404, {
-                    status: "error",
-                    message: "There is no user with this email address",
+                    status: 'error',
+                    message: 'There is no user with this email address',
                 });
             }
             let generatedToken = AccountHandler.getRandomString();
             sendPasswordResetEmail(
-                `${req.protocol}://${req.get("host")}/resetPassword`,
+                `${req.protocol}://${req.get('host')}/resetPassword`,
                 generatedToken,
                 user,
                 () => {
@@ -346,9 +346,9 @@ router.post(
                         token: generatedToken,
                     });
                     return sendResponse(res, 200, {
-                        status: "success",
+                        status: 'success',
                         message:
-                            "Verification mail has been sent to your account",
+                            'Verification mail has been sent to your account',
                     });
                 }
             );
@@ -357,16 +357,16 @@ router.post(
 );
 
 router.get(
-    "/resetPassword",
+    '/resetPassword',
     async (req: express.Request, res: express.Response) => {
         const token = req.query.token as string;
         if (!token) {
-            res.send("<d1>Token invalid</d1>");
+            res.send('<d1>Token invalid</d1>');
             return;
         }
         let changeRequestIndex = AccountHandler.forgotListIndexOfReq(token);
         if (changeRequestIndex === null) {
-            res.send("<d1>Token not found</d1>");
+            res.send('<d1>Token not found</d1>');
             return;
         }
         let changeRequest =
@@ -381,11 +381,11 @@ router.get(
         UserTable.update(changeRequest.user).then((userUpdateRes) => {
             if (!userUpdateRes) {
                 res.send(
-                    "<d1>Something went wrong during changing your account password</d1>"
+                    '<d1>Something went wrong during changing your account password</d1>'
                 );
                 return;
             } else {
-                res.send("<d1>Your password has been changed</d1>");
+                res.send('<d1>Your password has been changed</d1>');
             }
             AccountHandler.forgotPasswordWaitingList.splice(
                 changeRequestIndex,

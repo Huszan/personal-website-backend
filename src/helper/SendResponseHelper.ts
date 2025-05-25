@@ -1,5 +1,5 @@
-import { Response } from "express";
-import { ResponseData } from "../types/response-data.type";
+import { Response } from 'express';
+import { ResponseData } from '../types/response-data.type';
 
 export const sendResponse = (
     res: Response,

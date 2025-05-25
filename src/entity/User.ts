@@ -4,9 +4,9 @@ import {
     Column,
     OneToMany,
     JoinColumn,
-} from "typeorm";
-import { Like } from "./Like";
-import { ReadProgress } from "./ReadProgress";
+} from 'typeorm';
+import { Like } from './Like';
+import { ReadProgress } from './ReadProgress';
 
 @Entity()
 export class User {
@@ -17,7 +17,7 @@ export class User {
     name: string;
 
     @Column({
-        type: "text",
+        type: 'text',
     })
     email: string;
 
@@ -25,7 +25,7 @@ export class User {
     password: string;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
         nullable: true,
     })
     verificationCode: string;
@@ -41,13 +41,13 @@ export class User {
 
     @OneToMany(() => Like, (like) => like.user, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     likes: Like[];
 
     @OneToMany(() => ReadProgress, (progress) => progress.manga, {
         cascade: true,
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     })
     readProgress: ReadProgress[];
 }

@@ -1,7 +1,7 @@
-import { AppDataSource } from "../../data-source";
-import { ReadProgress } from "../../entity/ReadProgress";
-import { ReadProgressType } from "../../types/read-progress.type";
-import * as mangaTable from "./manga-table";
+import { AppDataSource } from '../../data-source';
+import { ReadProgress } from '../../entity/ReadProgress';
+import { ReadProgressType } from '../../types/read-progress.type';
+import * as mangaTable from './manga-table';
 
 export const repository = AppDataSource.manager.getRepository(ReadProgress);
 

@@ -1,8 +1,8 @@
-import { AppDataSource } from "../../data-source";
-import { Cache } from "../../entity/Cache";
-import { CacheType } from "../../types/cache.type";
-import { RepositoryFindOptions } from "../../types/repository-find-options";
-import { TableManager } from "./table-manager";
+import { AppDataSource } from '../../data-source';
+import { Cache } from '../../entity/Cache';
+import { CacheType } from '../../types/cache.type';
+import { RepositoryFindOptions } from '../../types/repository-find-options';
+import { TableManager } from './table-manager';
 
 const repository = AppDataSource.manager.getRepository(Cache);
 
@@ -11,7 +11,7 @@ export async function create(data: Cache) {
 }
 
 export async function read(options?: RepositoryFindOptions) {
-    let query = repository.createQueryBuilder("cache");
+    let query = repository.createQueryBuilder('cache');
     if (options) TableManager.applyOptionsToQuery(query, options);
 
     return query.getMany();

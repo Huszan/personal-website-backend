@@ -1,4 +1,4 @@
-const URL_TOKEN = "!!!";
+const URL_TOKEN = '!!!';
 
 export interface HtmlLocateType {
     id?: number;

@@ -1,12 +1,12 @@
 export interface RepositoryWhere {
     element: string;
     value: string | number | Array<string | number>;
-    specialType?: "like";
+    specialType?: 'like';
 }
 
 export interface RepositoryOrder {
     element: string;
-    sort: "ASC" | "DESC";
+    sort: 'ASC' | 'DESC';
 }
 
 export interface RepositoryRelation {

@@ -4,9 +4,9 @@ import {
     JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn,
-} from "typeorm";
-import { Manga } from "./Manga";
-import { Chapter } from "./Chapter";
+} from 'typeorm';
+import { Manga } from './Manga';
+import { Chapter } from './Chapter';
 
 @Entity()
 export class Page {
@@ -14,14 +14,14 @@ export class Page {
     id: number;
 
     @Column({
-        type: "longtext",
+        type: 'longtext',
     })
     url: string;
 
     @Column()
     chapter_id: number;
 
-    @ManyToOne(() => Chapter, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "chapter_id", referencedColumnName: "id" })
+    @ManyToOne(() => Chapter, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'chapter_id', referencedColumnName: 'id' })
     chapter: Chapter;
 }

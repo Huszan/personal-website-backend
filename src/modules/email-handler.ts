@@ -1,7 +1,7 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 const transporterMangaDot = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
@@ -23,7 +23,7 @@ export async function sendMail(body: any, callback: any) {
     let mailOptions = {
         from: '"Personal Website"', // sender address
         to: process.env.MAIL_PERSONAL, // list of receivers
-        subject: "Contact from Personal site ✔", // Subject line
+        subject: 'Contact from Personal site ✔', // Subject line
         text: `\n
     Name: ${body.name},\n
     Email: ${body.email},\n\n

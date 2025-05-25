@@ -1,5 +1,5 @@
-import { SelectQueryBuilder } from "typeorm";
-import { RepositoryFindOptions } from "../../types/repository-find-options";
+import { SelectQueryBuilder } from 'typeorm';
+import { RepositoryFindOptions } from '../../types/repository-find-options';
 
 export class TableManager {
     static applyOptionsToQuery(
@@ -28,7 +28,7 @@ export class TableManager {
         for (let option of options.where) {
             if (option.specialType) {
                 switch (option.specialType) {
-                    case "like": {
+                    case 'like': {
                         query.andWhere(`${option.element} LIKE :search${i}`, {
                             [`search${i}`]: `%${option.value}%`,
                         });
@@ -39,7 +39,7 @@ export class TableManager {
             } else {
                 query.andWhere(
                     `${option.element} ${
-                        Array.isArray(option.value) ? "IN" : "="
+                        Array.isArray(option.value) ? 'IN' : '='
                     } :val`,
                     {
                         val: option.value,
