@@ -68,6 +68,7 @@ router.put(
         try {
             const { id } = req.params;
             const mangaData: MangaType = req.body.manga;
+            console.log('Validating token for update');
             if (!validateAdminToken(req, res)) return;
             if (
                 !mangaData ||
@@ -91,8 +92,9 @@ router.put(
                 });
 
             const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
-
+            console.log('Stated manga update', manga);
             const results = await MangaTable.update(Number(id), manga, true);
+            console.log('Finished update');
             CascheTable.clearAllEntries();
 
             return sendResponse(res, 200, {
