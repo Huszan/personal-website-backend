@@ -262,7 +262,7 @@ router.get(
                 where: [{ element: 'manga_id', value: mangaId }],
             });
 
-            if (chapterList.length === 0) {
+            if (!chapterList || chapterList.length === 0) {
                 return sendResponse(res, 404, {
                     status: 'error',
                     message: "Didn't found any chapters for this manga",
