@@ -98,10 +98,6 @@ export class AdvancedScrapper {
                                 pages: pages,
                                 index: i,
                             });
-                        } else {
-                            throw new Error(
-                                `There is a problem processing ${chapterName}`
-                            );
                         }
                     })
                 );

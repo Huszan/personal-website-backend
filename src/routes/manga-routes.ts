@@ -91,7 +91,6 @@ router.put(
                 });
 
             const manga: Manga = MangaTable.convertDataToTableEntry(mangaData);
-
             const results = await MangaTable.update(Number(id), manga, true);
             CascheTable.clearAllEntries();
 
