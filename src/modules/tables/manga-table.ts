@@ -34,14 +34,14 @@ export async function read(options?: RepositoryFindOptions) {
 
     try {
         let mangaList = await query.getMany();
-        for (let manga of mangaList) {
-            if (!manga.imagePath) continue;
-            if (imageExists(manga.imagePath)) {
-                continue;
-            } else {
-                await update(manga.id, manga);
-            }
-        }
+        // for (let manga of mangaList) {
+        //     if (!manga.imagePath) continue;
+        //     if (imageExists(manga.imagePath)) {
+        //         continue;
+        //     } else {
+        //         await update(manga.id, manga);
+        //     }
+        // }
         return mangaList;
     } catch (e) {
         console.error(e);
