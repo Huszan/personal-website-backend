@@ -49,94 +49,153 @@ export class AdvancedScrapper {
         gathered.push(...elements);
         return gathered;
     }
+static async getMangaData(
+    localisation: {
+        name?: HtmlLocateType;
+        pic?: HtmlLocateType;
+        authors?: HtmlLocateType;
+        genres?: HtmlLocateType;
+        description?: HtmlLocateType;
+        chapters?: {
+            name: HtmlLocateType;
+            url: HtmlLocateType;
+        };
+        pages?: HtmlLocateType;
+    },
+    beforeUrl?: string
+): Promise<MangaType | any> {
+    // ===== TIMEOUT WRAPPER =====
+    const withTimeout = (promise: Promise<any>, ms = 15000) => {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout")), ms)
+            ),
+        ]);
+    };
 
-    static async getMangaData(
-        localisation: {
-            name?: HtmlLocateType;
-            pic?: HtmlLocateType;
-            authors?: HtmlLocateType;
-            genres?: HtmlLocateType;
-            description?: HtmlLocateType;
-            chapters?: {
-                name: HtmlLocateType;
-                url: HtmlLocateType;
-            };
-            pages?: HtmlLocateType;
-        },
-        beforeUrl?: string
-    ): Promise<MangaType | any> {
-        try {
-            let chapters: any = [];
-            if (localisation.chapters) {
-                let [chapterNames, chapterLinks] = await Promise.all([
-                    this.gatherEntries(localisation.chapters.name),
-                    this.gatherEntries(localisation.chapters.url),
-                ]);
+    try {
+        let chapters: any = [];
 
-                await Promise.all(
-                    chapterNames.map(async (chapterName, i) => {
-                        process.stdout.write(
-                            `\rProcessing ${i + 1}/${chapterNames.length}\r`
-                        );
-                        let pagesLocate = JSON.parse(
-                            JSON.stringify(localisation.pages)
-                        );
-                        pagesLocate.urls = [
-                            `${beforeUrl ? beforeUrl : ''}${chapterLinks[i]}`,
-                        ];
+        if (localisation.chapters) {
+            console.log("Fetching chapter list...");
 
-                        let pageEntries = await this.gatherEntries(pagesLocate);
-                        let pages: PageType[] = pageEntries.map((page) => {
-                            return {
-                                url: page,
-                            };
-                        });
+            let [chapterNames, chapterLinks] = await Promise.all([
+                this.gatherEntries(localisation.chapters.name),
+                this.gatherEntries(localisation.chapters.url),
+            ]);
 
-                        if (pages.length > 0) {
-                            chapters.push({
-                                name: chapterName,
-                                pages: pages,
-                                index: i,
-                            });
-                        }
-                    })
-                );
+            console.log("Chapters found:", chapterNames.length);
+
+            if (chapterNames.length !== chapterLinks.length) {
+                console.warn("⚠️ Names/links length mismatch!");
             }
-            if (chapters.length === 0) {
-                throw new Error('No chapters found!');
-            }
-            chapters.sort((a, b) => a.index - b.index);
 
-            let manga = {
-                name: localisation.name
-                    ? await this.gatherEntries(localisation.name)
-                    : null,
-                pic: localisation.pic
-                    ? await this.gatherEntries(localisation.pic)
-                    : null,
-                authors: localisation.authors
-                    ? await this.gatherEntries(localisation.authors)
-                    : null,
-                genres: localisation.genres
-                    ? await this.gatherEntries(localisation.genres)
-                    : null,
-                description: localisation.description
-                    ? await this.gatherEntries(localisation.description)
-                    : null,
-                chapters: chapters,
-            };
-            if (manga.name) manga.name = manga.name[0];
-            if (manga.pic) manga.pic = manga.pic[0];
-            if (manga.description) manga.description = manga.description[0];
-            return manga;
-        } catch (error) {
-            console.log(
-                'Something went wrong during getting manga data: ',
-                error.message
-            );
-            return null;
+            // ===== SEQUENTIAL LOOP (NO MORE Promise.all) =====
+            for (let i = 0; i < chapterNames.length; i++) {
+                const chapterName = chapterNames[i];
+
+                console.log(`\n=== START chapter ${i} ===`);
+                console.log("Name:", chapterName);
+                console.log("Link:", chapterLinks[i]);
+
+                try {
+                    if (!localisation.pages) {
+                        throw new Error("pages locator is missing");
+                    }
+
+                    // Clone locator safely
+                    let pagesLocate = JSON.parse(
+                        JSON.stringify(localisation.pages)
+                    );
+
+                    const fullUrl = `${beforeUrl ? beforeUrl : ''}${chapterLinks[i]}`;
+                    pagesLocate.urls = [fullUrl];
+
+                    console.log("URL:", fullUrl);
+
+                    // ===== TIMEOUT PROTECTION =====
+                    let pageEntries = await withTimeout(
+                        this.gatherEntries(pagesLocate),
+                        15000
+                    );
+
+                    if (!pageEntries || pageEntries.length === 0) {
+                        console.warn("⚠️ No pages found");
+                        continue;
+                    }
+
+                    let pages: PageType[] = pageEntries.map((page, index) => {
+                        console.log(`Page ${index}:`, page);
+                        return { url: page };
+                    });
+
+                    chapters.push({
+                        name: chapterName,
+                        pages: pages,
+                        index: i,
+                    });
+
+                    console.log(
+                        `✅ Added chapter "${chapterName}" (${pages.length} pages)`
+                    );
+                } catch (err) {
+                    // ===== CRITICAL: DO NOT BLOCK LOOP =====
+                    console.error(`❌ Failed chapter ${i}:`, err.message);
+                }
+
+                console.log(`=== END chapter ${i} ===`);
+            }
         }
+
+        console.log("Total chapters:", chapters.length);
+
+        if (chapters.length === 0) {
+            throw new Error("No chapters found!");
+        }
+
+        // Sort chapters safely
+        chapters.sort((a, b) => a.index - b.index);
+
+        console.log("Fetching manga metadata...");
+
+        let manga = {
+            name: localisation.name
+                ? await this.gatherEntries(localisation.name)
+                : null,
+            pic: localisation.pic
+                ? await this.gatherEntries(localisation.pic)
+                : null,
+            authors: localisation.authors
+                ? await this.gatherEntries(localisation.authors)
+                : null,
+            genres: localisation.genres
+                ? await this.gatherEntries(localisation.genres)
+                : null,
+            description: localisation.description
+                ? await this.gatherEntries(localisation.description)
+                : null,
+            chapters: chapters,
+        };
+
+        // Normalize fields
+        if (manga.name) manga.name = manga.name[0];
+        if (manga.pic) manga.pic = manga.pic[0];
+        if (manga.description) manga.description = manga.description[0];
+
+        console.log("✅ Finished successfully");
+
+        return manga;
+    } catch (error) {
+        console.error(
+            "❌ Something went wrong during getting manga data:",
+            error.message
+        );
+        console.error(error);
+
+        return null;
     }
+}
 
     private static async localiseElements(
         $: CheerioAPI,
