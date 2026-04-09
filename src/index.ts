@@ -5,7 +5,9 @@ import * as express from 'express';
 import * as router from './routes/_main-router';
 
 const cors = require('cors');
-require('@dotenvx/dotenvx').config();
+if (process.env.NODE_ENV == null) {
+  require('@dotenvx/dotenvx').config();
+}
 
 AppDataSource.initialize()
     .then(async () => {
