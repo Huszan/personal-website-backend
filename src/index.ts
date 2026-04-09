@@ -8,7 +8,7 @@ const cors = require('cors');
 if (process.env.NODE_ENV == null) {
   require('@dotenvx/dotenvx').config();
 }
-
+console.log('Environment Variables - ', process.env);
 AppDataSource.initialize()
     .then(async () => {
         const app = express();
