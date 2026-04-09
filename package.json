@@ -5,6 +5,7 @@
     "type": "commonjs",
     "scripts": {
         "start": "dotenvx run --env-file=.env -- ts-node src/index.ts",
+        "start-no-env": "ts-node src/index.ts",
         "serve": "dotenvx run --env-file=.env.local -- nodemon",
         "typeorm": "typeorm-ts-node-commonjs",
         "format": "prettier --write \"src/**/*.ts\"",
